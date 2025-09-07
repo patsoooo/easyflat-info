@@ -1,0 +1,134 @@
+// Rules
+
+* {
+    padding: 0;
+    margin: 0;
+  }
+
+*,
+:after,
+:before {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 62.5%;
+}
+
+body {
+  letter-spacing: 0;
+  background-color: $bg-grey;
+  font-family: $font-regular;
+  color: $text-black;
+  font-size: 1.4rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: normal;
+}
+
+button {
+  border: 0;
+  outline: 0 !important;
+  cursor: pointer;
+}
+
+table {
+  border-spacing: 0px !important;
+  border-collapse: collapse !important;
+}
+
+li {
+  list-style-type: none;
+}
+
+input {
+  outline: 0 !important;
+}
+
+input[type="search"]::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  
+  input[type="search"]::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    display: none;
+  }
+
+//   ЗМІНИТИ
+
+input[type="search"],
+input[type="text"],
+input[type="submit"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="phone"],
+textarea {
+  -webkit-appearance: none;
+  font-size: 1.4rem;
+  border-radius: 0;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+textarea {
+  resize: none;
+  outline: 0 !important;
+}
+
+select {
+  outline: 0 !important;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+  // STYLES
+
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 1.2rem;
+  @media (min-width: 660px) {
+    max-width: 62.4rem;
+  }
+}

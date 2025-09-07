@@ -1,0 +1,19 @@
+@font-face {
+  font-family: $font-regular;
+  src: url(@/fonts/SF-Pro-Text-Regular.otf);
+}
+
+@font-face {
+  font-family: $font-medium;
+  src: url(@/fonts/SF-Pro-Text-Medium.otf);
+}
+
+@font-face {
+  font-family: $font-semibold;
+  src: url(@/fonts/SF-Pro-Text-Semibold.otf);
+}
+
+@font-face {
+  font-family: $font-display-bold;
+  src: url(@/fonts/SF-Pro-Display-Bold.otf);
+}

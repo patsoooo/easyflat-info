@@ -1,0 +1,36 @@
+@mixin text-style($font-size, $line-height, $letter-spacing, $font-family) {
+  font-size: $font-size;
+  line-height: $line-height;
+  letter-spacing: $letter-spacing;
+  font-family: $font-family;
+}
+
+// 24 px
+
+@mixin text-24-bold {
+  @include text-style(2.4rem, 2.8rem, 0.033rem, $font-display-bold);
+}
+
+// 15 px
+
+@mixin text-15-regular {
+  @include text-style(1.5rem, 1.9rem, -0.024rem, $font-regular);
+}
+
+@mixin text-15-medium {
+  @include text-style(1.5rem, 1.9rem, -0.024rem, $font-medium);
+}
+
+@mixin text-15-semibold {
+  @include text-style(1.5rem, 1.9rem, -0.024rem, $font-semibold);
+}
+
+// 17 px
+
+@mixin text-17-regular {
+  @include text-style(1.7rem, 2.2rem, -0.041rem, $font-regular);
+}
+
+@mixin text-17-medium {
+  @include text-style(1.7rem, 2.2rem, -0.041rem, $font-medium);
+}
