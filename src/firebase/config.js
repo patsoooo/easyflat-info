@@ -3,12 +3,12 @@ import { getFirestore } from 'firebase/firestore';
 
 // Ваша конфігурація з Firebase Console
 const firebaseConfig = {
-  apiKey: 'AIzaSyDL0DD5WahfEfCRWp2oXFZU0hs-n8-5nbo',
-  authDomain: 'easyflat-a6789.firebaseapp.com',
-  projectId: 'easyflat-a6789',
-  storageBucket: 'easyflat-a6789.firebasestorage.app',
-  messagingSenderId: '360086913641',
-  appId: '1:360086913641:web:70ac8aacedc85c1936d8f8',
+  apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
+  authDomain: process.env.VUE_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VUE_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VUE_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VUE_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VUE_APP_FIREBASE_APP_ID,
 };
 
 // Ініціалізація Firebase
