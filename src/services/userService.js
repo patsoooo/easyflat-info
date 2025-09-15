@@ -424,6 +424,161 @@ export const generateDescription = (citizenshipStatus, timeInPoland) => {
   return `${citizenshipText}, ${timeText}`;
 };
 
+export const getTranslatedCitizenship = (citizenshipStatus, t) => t(`citizenship.${citizenshipStatus}`);
+
+// Функція для отримання перекладеного тексту часу в Польщі
+export const getTranslatedTimeInPoland = (timeInPoland, t) => t(`timeInPoland.${timeInPoland}`);
+
+// Функції для перекладів additionalInfo
+export const generateTranslatedLanguagesText = (languages, t) => {
+  if (!languages || !Array.isArray(languages) || languages.length === 0) {
+    return null;
+  }
+
+  const languageNames = languages
+    .map((lang) => t(`languagesList.${lang}`))
+    .filter(Boolean);
+
+  if (languageNames.length === 0) return null;
+
+  const prefix = t('common.languagesPrefix');
+
+  if (languageNames.length === 1) {
+    return `${prefix} ${languageNames[0]}`;
+  }
+
+  if (languageNames.length === 2) {
+    return `${prefix} ${languageNames[0]} і ${languageNames[1]}`;
+  }
+
+  const lastLanguage = languageNames.pop();
+  return `${prefix} ${languageNames.join(', ')} і ${lastLanguage}`;
+};
+
+export const generateTranslatedPetsText = (hasPets, petTypes, t) => {
+  if (hasPets === false || hasPets === 'no') {
+    return t('pets.noPets');
+  }
+
+  if (hasPets === true || hasPets === 'yes') {
+    if (!petTypes || !Array.isArray(petTypes) || petTypes.length === 0) {
+      return t('pets.hasPet');
+    }
+
+    if (petTypes.length === 1 && petTypes[0] === 'other') {
+      return t('pets.hasPet');
+    }
+
+    const specificPets = petTypes.filter((pet) => pet !== 'other');
+    if (specificPets.length === 1) {
+      const petText = t(`pets.${specificPets[0]}`);
+      const tenantHas = t('common.tenantHas');
+      return `${tenantHas} ${petText}`;
+    }
+
+    return t('pets.hasPets');
+  }
+
+  return null;
+};
+
+export const generateTranslatedMoveInDate = (dateString, t) => {
+  if (!dateString) return null;
+
+  try {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const monthKey = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const month = t(`common.months.${monthKey}`);
+    const prefix = t('common.moveInPrefix');
+
+    return `${prefix} ${day} ${month} ${year}`;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getTranslatedFlatmates = (flatmates, t) => t(`flatmates.${flatmates}`);
+
+export const getTranslatedSmoking = (smoking, t) => (smoking ? t('smoking.yes') : t('smoking.no'));
+
+export const getTranslatedBudget = (budget, t) => {
+  const prefix = t('common.budgetPrefix');
+  const budgetText = t(`budget.${budget}`);
+  return `${prefix} ${budgetText}`;
+};
+
+export const getTranslatedRentalDuration = (rentalDuration, t) => t(`rentalDuration.${rentalDuration}`);
+
+// Функції для перекладів workplace
+export const getTranslatedSalaryRange = (salaryRange, t) => t(`workplace.salaryRanges.${salaryRange}`);
+
+export const getTranslatedIncomeDocument = (incomeDocument, t) => t(`workplace.incomeDocuments.${incomeDocument}`);
+
+export const getTranslatedWorkDuration = (workDuration, t) => t(`workplace.workDuration.${workDuration}`);
+
+// Функції для перекладів rentalHistory
+export const generateTranslatedRentalPeriod = (
+  startMonth,
+  startYear,
+  endMonth,
+  endYear,
+  isCurrentlyRenting,
+  t,
+) => {
+  if (!startMonth || !startYear) return null;
+
+  const startMonthName = t(`rentalHistory.months.${parseInt(startMonth, 10)}`);
+  if (!startMonthName) return null;
+
+  const startText = `${startMonthName} ${startYear}`;
+
+  if (isCurrentlyRenting) {
+    const currentSuffix = t('rentalHistory.period.currentSuffix');
+    return `${startText} - ${currentSuffix}`;
+  }
+
+  if (endMonth && endYear) {
+    const endMonthName = t(`rentalHistory.months.${parseInt(endMonth, 10)}`);
+    if (endMonthName) {
+      return `${startText} - ${endMonthName} ${endYear}`;
+    }
+  }
+
+  return startText;
+};
+
+export const generateTranslatedLandlordContact = (contact, t) => {
+  if (!contact) return null;
+
+  const trimmedContact = contact.trim();
+
+  // Перевіряємо чи це схоже на телефон
+  const phoneRegex = /^\+?[\d\s\-()]+$/;
+  if (phoneRegex.test(trimmedContact)) {
+    const prefix = t('rentalHistory.contact.phonePrefix');
+    return `${prefix} ${trimmedContact}`;
+  }
+
+  // Перевіряємо чи це схоже на email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (emailRegex.test(trimmedContact)) {
+    const prefix = t('rentalHistory.contact.emailPrefix');
+    return `${prefix} ${trimmedContact}`;
+  }
+
+  const prefix = t('rentalHistory.contact.contactPrefix');
+  return `${prefix} ${trimmedContact}`;
+};
+
+export const getTranslatedCity = (city, t) => t(`rentalHistory.cities.${city}`);
+
+export const getTranslatedRentalConfirmation = (confirmation, t) => t(`rentalHistory.confirmations.${confirmation}`);
+
+export const getTranslatedRentalHistoryFallback = (t) => t('rentalHistory.fallback');
+
 // Функція для генерації workplace інформації
 export const generateWorkplaceInfo = (companyName, position) => {
   if (!companyName && !position) return null;
@@ -677,7 +832,7 @@ export const createUser = async (userData) => {
           landlordContact: period.landlordContact || null,
           landlordContactText: formatLandlordContact(period.landlordContact),
 
-          rentalConfirmations: period.rentalConfirmations || [],
+          rentalConfirmation: period.rentalConfirmation || null,
         };
       }) : [],
 

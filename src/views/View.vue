@@ -23,7 +23,7 @@
           {{ userData?.name || 'Немає інформації' }}
         </div>
         <div class="user_data-desc">
-          {{ userData?.description || 'Немає інформації' }}
+          {{ translatedDescription || 'Немає інформації' }}
         </div>
 
         <!-- Соціальні мережі - показуємо тільки якщо є хоча б одна -->
@@ -53,7 +53,7 @@
 
       <!-- Контакт - показуємо тільки якщо є телефон або email -->
       <div v-if="hasContactInfo" class="user_section">
-        <span class="user_section-title">Контакт</span>
+        <span class="user_section-title">{{ $t('sections.contact') }}</span>
         <ul class="user_list">
           <li v-if="userData?.contact?.phone" class="user_info">
             <img src="../img/icons/phone.svg" alt="phone">
@@ -70,9 +70,9 @@
         </ul>
       </div>
 
-      <!-- Захаркоджені секції поки що -->
+      <!-- Місце роботи -->
       <div v-if="hasWorkplaceInfo" class="user_section">
-        <span class="user_section-title">Місце роботи</span>
+        <span class="user_section-title">{{ $t('sections.workplace') }}</span>
         <ul class="user_list">
           <li v-if="userData?.workplace?.workInfo" class="user_info">
             <img src="../img/icons/work.svg" alt="work">
@@ -83,16 +83,16 @@
           <li v-if="userData?.workplace?.salaryRange" class="user_info">
             <img src="../img/icons/money.svg" alt="money">
             <div class="user_info-data">
-              <p>{{ getSalaryDisplayText(userData.workplace.salaryRange) }}</p>
+              <p>{{ getTranslatedSalaryRangeText() }}</p>
               <span v-if="userData?.workplace?.incomeDocument">
-                {{ getIncomeDocumentDisplayText(userData.workplace.incomeDocument) }}
+                {{ getTranslatedIncomeDocumentText() }}
               </span>
             </div>
           </li>
           <li v-if="userData?.workplace?.workDuration" class="user_info">
             <img src="../img/icons/time.svg" alt="time">
             <div class="user_info-data">
-              <p>{{ getWorkDurationDisplayText(userData.workplace.workDuration) }}</p>
+              <p>{{ getTranslatedWorkDurationText() }}</p>
             </div>
           </li>
         </ul>
@@ -100,32 +100,30 @@
 
       <!-- Історія оренди -->
       <div v-if="hasRentalHistory" class="user_section">
-        <span class="user_section-title">Історія оренди</span>
+        <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
         <div class="user_history">
           <div v-for="(period, index) in userData.rentalHistory"
           :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
           :key="index">
-            <span class="user_history-title">{{ period?.period || 'Невідомий період' }}</span>
+            <span class="user_history-title">{{ getTranslatedPeriod(period) }}</span>
             <ul class="user_list">
               <li v-if="period?.address" class="user_info">
                 <img src="../img/icons/location.svg" alt="location">
                 <div class="user_info-data">
                   <p>{{ period.address }}</p>
-                  <span v-if="period?.location">{{ period.location }}</span>
+                  <span v-if="period?.city">{{ getTranslatedLocationText(period.city) }}</span>
                 </div>
               </li>
-              <li v-if="period?.landlordContactText" class="user_info">
+              <li v-if="period?.landlordContact" class="user_info">
                 <img src="../img/icons/phone.svg" alt="phone">
                 <div class="user_info-data">
-                  <p>{{ period.landlordContactText }}</p>
+                  <p>{{ getTranslatedLandlordContactText(period.landlordContact) }}</p>
                 </div>
               </li>
-              <li v-if="period?.rentalConfirmations?.length > 0" class="user_info">
+              <li v-if="period?.rentalConfirmation" class="user_info">
                 <img src="../img/icons/money.svg" alt="money">
                 <div class="user_info-data">
-                  <p v-for="confirmation in period.rentalConfirmations" :key="confirmation">
-                    {{ getRentalConfirmationDisplayText(confirmation) }}
-                  </p>
+                  <p>{{ getTranslatedRentalConfirmationText(period.rentalConfirmation) }}</p>
                 </div>
               </li>
             </ul>
@@ -135,57 +133,58 @@
 
       <!-- Якщо немає історії оренди, показуємо заглушку -->
       <div v-else class="user_section">
-        <span class="user_section-title">Історія оренди</span>
+        <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
         <div class="user_history">
-          <span class="user_history-title">Інформація буде додана пізніше</span>
+          <span class="user_history-title">{{ getTranslatedRentalHistoryFallbackText() }}</span>
         </div>
       </div>
 
 <!-- Додаткова інформація - показуємо тільки якщо є хоча б одне поле -->
       <div v-if="hasAdditionalInfo" class="user_section">
-        <span class="user_section-title">Додаткова інформація</span>
+        <span class="user_section-title">{{ $t('sections.additionalInfo') }}</span>
         <ul class="user_list">
-          <li v-if="userData?.additionalInfo?.languagesText" class="user_info">
+          <li v-if="userData?.additionalInfo?.languages?.length > 0" class="user_info">
             <img src="../img/icons/language.svg" alt="language">
             <div class="user_info-data">
-              <p>{{ userData.additionalInfo.languagesText }}</p>
+              <p>{{ getTranslatedLanguagesText() }}</p>
             </div>
           </li>
-          <li v-if="userData?.additionalInfo?.petsText" class="user_info">
+          <li v-if="userData?.additionalInfo?.hasPets !== null
+          && userData?.additionalInfo?.hasPets !== undefined" class="user_info">
             <img src="../img/icons/pets.svg" alt="pets">
             <div class="user_info-data">
-              <p>{{ userData.additionalInfo.petsText }}</p>
+              <p>{{ getTranslatedPetsText() }}</p>
             </div>
           </li>
           <li v-if="userData?.additionalInfo?.flatmates" class="user_info">
             <img src="../img/icons/flatmates.svg" alt="flatmates">
             <div class="user_info-data">
-              <p>{{ getFlatmatesDisplayText(userData.additionalInfo.flatmates) }}</p>
+              <p>{{ getTranslatedFlmatmatesText() }}</p>
             </div>
           </li>
           <li v-if="userData?.additionalInfo?.smoking !== null
           && userData?.additionalInfo?.smoking !== undefined" class="user_info">
             <img src="../img/icons/smoke.svg" alt="smoke">
             <div class="user_info-data">
-              <p>{{ userData.additionalInfo.smoking ? 'Палить' : 'Не палить' }}</p>
+              <p>{{ getTranslatedSmokingText() }}</p>
             </div>
           </li>
           <li v-if="userData?.additionalInfo?.budget" class="user_info">
             <img src="../img/icons/money.svg" alt="money">
             <div class="user_info-data">
-              <p>Бюджет: {{ getBudgetDisplayText(userData.additionalInfo.budget) }}</p>
+              <p>{{ getTranslatedBudgetText() }}</p>
             </div>
           </li>
           <li v-if="userData?.additionalInfo?.rentalDuration" class="user_info">
             <img src="../img/icons/time.svg" alt="time">
             <div class="user_info-data">
-              <p>{{ getRentalDurationDisplayText(userData.additionalInfo.rentalDuration) }}</p>
+              <p>{{ getTranslatedRentalDurationText() }}</p>
             </div>
           </li>
-          <li v-if="userData?.additionalInfo?.moveInDateText" class="user_info">
+          <li v-if="userData?.additionalInfo?.moveInDate" class="user_info">
             <img src="../img/icons/calendar.svg" alt="calendar">
             <div class="user_info-data">
-              <p>{{ userData.additionalInfo.moveInDateText }}</p>
+              <p>{{ getTranslatedMoveInDateText() }}</p>
             </div>
           </li>
         </ul>
@@ -195,17 +194,31 @@
 </template>
 
 <script>
+import { useI18n } from 'vue-i18n';
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import {
+  getTranslatedCitizenship,
+  getTranslatedTimeInPoland,
+  generateTranslatedLanguagesText,
+  generateTranslatedPetsText,
+  generateTranslatedMoveInDate,
+  getTranslatedFlatmates,
+  getTranslatedSmoking,
+  getTranslatedBudget,
+  getTranslatedRentalDuration,
+  getTranslatedSalaryRange,
+  getTranslatedIncomeDocument,
+  getTranslatedWorkDuration,
+  generateTranslatedRentalPeriod,
+  generateTranslatedLandlordContact,
+  getTranslatedCity,
+  getTranslatedRentalConfirmation,
+  getTranslatedRentalHistoryFallback,
   getUserByProfileId,
-  SALARY_RANGES,
-  INCOME_DOCUMENTS,
-  WORK_DURATION,
   FLATMATE_OPTIONS,
   BUDGET_RANGES,
   RENTAL_DURATION,
-  RENTAL_CONFIRMATIONS,
 } from '@/services/userService';
 import Header from '../components/Header.vue';
 import Gradient from '../components/Gradient.vue';
@@ -217,12 +230,93 @@ export default {
     Gradient,
   },
   setup() {
+    const { t } = useI18n();
     const route = useRoute();
 
     // Реактивні змінні
     const userData = ref(null);
     const loading = ref(true);
     const error = ref(null);
+
+    const translatedDescription = computed(() => {
+      if (!userData.value) return '';
+
+      const citizenshipText = getTranslatedCitizenship(userData.value.citizenshipStatus, t);
+      const timeText = getTranslatedTimeInPoland(userData.value.timeInPoland, t);
+
+      return `${citizenshipText}, ${timeText}`;
+    });
+
+    const getTranslatedLanguagesText = () => {
+      if (!userData.value?.additionalInfo?.languages) return '';
+      return generateTranslatedLanguagesText(userData.value.additionalInfo.languages, t);
+    };
+
+    const getTranslatedPetsText = () => {
+      if (!userData.value?.additionalInfo) return '';
+      return generateTranslatedPetsText(
+        userData.value.additionalInfo.hasPets,
+        userData.value.additionalInfo.petTypes,
+        t,
+      );
+    };
+
+    const getTranslatedFlmatmatesText = () => {
+      if (!userData.value?.additionalInfo?.flatmates) return '';
+      return getTranslatedFlatmates(userData.value.additionalInfo.flatmates, t);
+    };
+
+    const getTranslatedSmokingText = () => {
+      if (userData.value?.additionalInfo?.smoking === null || userData.value?.additionalInfo?.smoking === undefined) return '';
+      return getTranslatedSmoking(userData.value.additionalInfo.smoking, t);
+    };
+
+    const getTranslatedBudgetText = () => {
+      if (!userData.value?.additionalInfo?.budget) return '';
+      return getTranslatedBudget(userData.value.additionalInfo.budget, t);
+    };
+
+    const getTranslatedRentalDurationText = () => {
+      if (!userData.value?.additionalInfo?.rentalDuration) return '';
+      return getTranslatedRentalDuration(userData.value.additionalInfo.rentalDuration, t);
+    };
+
+    const getTranslatedMoveInDateText = () => {
+      if (!userData.value?.additionalInfo?.moveInDate) return '';
+      return generateTranslatedMoveInDate(userData.value.additionalInfo.moveInDate, t);
+    };
+
+    const getTranslatedSalaryRangeText = () => {
+      if (!userData.value?.workplace?.salaryRange) return '';
+      return getTranslatedSalaryRange(userData.value.workplace.salaryRange, t);
+    };
+
+    const getTranslatedIncomeDocumentText = () => {
+      if (!userData.value?.workplace?.incomeDocument) return '';
+      return getTranslatedIncomeDocument(userData.value.workplace.incomeDocument, t);
+    };
+
+    const getTranslatedWorkDurationText = () => {
+      if (!userData.value?.workplace?.workDuration) return '';
+      return getTranslatedWorkDuration(userData.value.workplace.workDuration, t);
+    };
+
+    const getTranslatedPeriod = (period) => generateTranslatedRentalPeriod(
+      period.startMonth,
+      period.startYear,
+      period.endMonth,
+      period.endYear,
+      period.isCurrentlyRenting,
+      t,
+    );
+
+    const getTranslatedLocationText = (city) => getTranslatedCity(city, t);
+    // eslint-disable-next-line
+    const getTranslatedLandlordContactText = (contact) => generateTranslatedLandlordContact(contact, t);
+    // eslint-disable-next-line
+    const getTranslatedRentalConfirmationText = (confirmation) => getTranslatedRentalConfirmation(confirmation, t);
+
+    const getTranslatedRentalHistoryFallbackText = () => getTranslatedRentalHistoryFallback(t);
 
     // Computed властивості для перевірки наявності даних
     const hasSocialMedia = computed(() => {
@@ -258,19 +352,11 @@ export default {
          && Array.isArray(userData.value.rentalHistory)
          && userData.value.rentalHistory.length > 0);
 
-    const getSalaryDisplayText = (salaryRange) => SALARY_RANGES[salaryRange]?.displayText || '';
-
-    const getIncomeDocumentDisplayText = (incomeDocument) => INCOME_DOCUMENTS[incomeDocument]?.displayText || '';
-
-    const getWorkDurationDisplayText = (workDuration) => WORK_DURATION[workDuration]?.displayText || '';
-
     const getFlatmatesDisplayText = (flatmates) => FLATMATE_OPTIONS[flatmates]?.displayText || '';
 
     const getBudgetDisplayText = (budget) => BUDGET_RANGES[budget]?.displayText || '';
 
     const getRentalDurationDisplayText = (rentalDuration) => RENTAL_DURATION[rentalDuration]?.displayText || '';
-
-    const getRentalConfirmationDisplayText = (confirmation) => RENTAL_CONFIRMATIONS[confirmation]?.displayText || '';
 
     // Функція завантаження користувача
     const loadUser = async () => {
@@ -318,13 +404,25 @@ export default {
       hasWorkplaceInfo,
       hasAdditionalInfo,
       hasRentalHistory,
-      getSalaryDisplayText,
-      getIncomeDocumentDisplayText,
-      getWorkDurationDisplayText,
       getFlatmatesDisplayText,
       getBudgetDisplayText,
       getRentalDurationDisplayText,
-      getRentalConfirmationDisplayText,
+      translatedDescription,
+      getTranslatedLanguagesText,
+      getTranslatedPetsText,
+      getTranslatedFlmatmatesText,
+      getTranslatedSmokingText,
+      getTranslatedBudgetText,
+      getTranslatedRentalDurationText,
+      getTranslatedMoveInDateText,
+      getTranslatedSalaryRangeText,
+      getTranslatedIncomeDocumentText,
+      getTranslatedWorkDurationText,
+      getTranslatedPeriod,
+      getTranslatedLocationText,
+      getTranslatedLandlordContactText,
+      getTranslatedRentalConfirmationText,
+      getTranslatedRentalHistoryFallbackText,
     };
   },
 };
