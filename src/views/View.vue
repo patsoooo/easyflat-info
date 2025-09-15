@@ -25,152 +25,167 @@
         <div class="user_data-desc">
           {{ userData?.description || 'Немає інформації' }}
         </div>
-        <ul class="user_data-social">
-          <li>
-            <a href="" target="_blank">
+
+        <!-- Соціальні мережі - показуємо тільки якщо є хоча б одна -->
+        <ul v-if="hasSocialMedia" class="user_data-social">
+          <li v-if="userData?.socialMedia?.whatsapp">
+            <a :href="userData.socialMedia.whatsapp" target="_blank">
               <img src="../img/social/whatsapp.svg" alt="whatsapp">
             </a>
           </li>
-          <li>
-            <a href="" target="_blank">
+          <li v-if="userData?.socialMedia?.instagram">
+            <a :href="userData.socialMedia.instagram" target="_blank">
               <img src="../img/social/instagram.svg" alt="instagram">
             </a>
           </li>
-          <li>
-            <a href="" target="_blank">
-              <img src="../img/social/fb.svg" alt="fb">
+          <li v-if="userData?.socialMedia?.facebook">
+            <a :href="userData.socialMedia.facebook" target="_blank">
+              <img src="../img/social/fb.svg" alt="facebook">
+            </a>
+          </li>
+          <li v-if="userData?.socialMedia?.telegram">
+            <a :href="userData.socialMedia.telegram" target="_blank">
+              <img src="../img/social/linkedin.svg" alt="telegram">
             </a>
           </li>
         </ul>
       </div>
 
-      <div class="user_section">
+      <!-- Контакт - показуємо тільки якщо є телефон або email -->
+      <div v-if="hasContactInfo" class="user_section">
         <span class="user_section-title">Контакт</span>
         <ul class="user_list">
-          <li class="user_info">
+          <li v-if="userData?.contact?.phone" class="user_info">
             <img src="../img/icons/phone.svg" alt="phone">
             <div class="user_info-data">
-              <p>{{ userData?.contact?.[0]?.value || 'Немає інформації' }}</p>
+              <p>{{ userData.contact.phone }}</p>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.contact?.email" class="user_info">
             <img src="../img/icons/email.svg" alt="email">
             <div class="user_info-data">
-              <p>{{ userData?.contact?.[1]?.value || 'Немає інформації' }}</p>
+              <p>{{ userData.contact.email }}</p>
             </div>
           </li>
         </ul>
       </div>
 
-      <div class="user_section">
+      <!-- Захаркоджені секції поки що -->
+      <div v-if="hasWorkplaceInfo" class="user_section">
         <span class="user_section-title">Місце роботи</span>
         <ul class="user_list">
-          <li class="user_info">
+          <li v-if="userData?.workplace?.workInfo" class="user_info">
             <img src="../img/icons/work.svg" alt="work">
             <div class="user_info-data">
-              <p>{{ userData?.workplace?.[0]?.value || 'Немає інформації' }}</p>
+              <p>{{ userData.workplace.workInfo }}</p>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.workplace?.salaryRange" class="user_info">
             <img src="../img/icons/money.svg" alt="money">
             <div class="user_info-data">
-              <p>{{ userData?.workplace?.[1]?.value || 'Немає інформації' }}</p>
-              <span v-if="userData?.workplace?.[1]?.description">
-                {{ userData.workplace[1].description }}</span>
+              <p>{{ getSalaryDisplayText(userData.workplace.salaryRange) }}</p>
+              <span v-if="userData?.workplace?.incomeDocument">
+                {{ getIncomeDocumentDisplayText(userData.workplace.incomeDocument) }}
+              </span>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.workplace?.workDuration" class="user_info">
             <img src="../img/icons/time.svg" alt="time">
             <div class="user_info-data">
-              <p>{{ userData?.workplace?.[2]?.value || 'Немає інформації' }}</p>
+              <p>{{ getWorkDurationDisplayText(userData.workplace.workDuration) }}</p>
             </div>
           </li>
         </ul>
       </div>
 
-      <div class="user_section">
+      <!-- Історія оренди -->
+      <div v-if="hasRentalHistory" class="user_section">
         <span class="user_section-title">Історія оренди</span>
         <div class="user_history">
-          <div v-if="userData?.rentalHistory?.length > 0">
-            <div v-for="(period, index) in userData.rentalHistory"
-            :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
-            :key="index">
-              <span class="user_history-title">{{ period?.period || 'Невідомий період' }}</span>
-              <ul class="user_list">
-                <li class="user_info">
-                  <img src="../img/icons/location.svg" alt="location">
-                  <div class="user_info-data">
-                    <p>{{ period?.items?.[0]?.value || 'Немає інформації' }}</p>
-                    <span v-if="period?.items?.[0]?.description">
-                      {{ period.items[0].description }}</span>
-                  </div>
-                </li>
-                <li class="user_info">
-                  <img src="../img/icons/money.svg" alt="money">
-                  <div class="user_info-data">
-                    <p>{{ period?.items?.[1]?.value || 'Немає інформації' }}</p>
-                    <span v-if="period?.items?.[1]?.description">
-                      {{ period.items[1].description }}</span>
-                  </div>
-                </li>
-                <li class="user_info">
-                  <img src="../img/icons/phone.svg" alt="phone">
-                  <div class="user_info-data">
-                    <p>{{ period?.items?.[2]?.value || 'Немає інформації' }}</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div v-else>
-            <span class="user_history-title">Немає інформації про оренду</span>
+          <div v-for="(period, index) in userData.rentalHistory"
+          :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
+          :key="index">
+            <span class="user_history-title">{{ period?.period || 'Невідомий період' }}</span>
+            <ul class="user_list">
+              <li v-if="period?.address" class="user_info">
+                <img src="../img/icons/location.svg" alt="location">
+                <div class="user_info-data">
+                  <p>{{ period.address }}</p>
+                  <span v-if="period?.location">{{ period.location }}</span>
+                </div>
+              </li>
+              <li v-if="period?.landlordContactText" class="user_info">
+                <img src="../img/icons/phone.svg" alt="phone">
+                <div class="user_info-data">
+                  <p>{{ period.landlordContactText }}</p>
+                </div>
+              </li>
+              <li v-if="period?.rentalConfirmations?.length > 0" class="user_info">
+                <img src="../img/icons/money.svg" alt="money">
+                <div class="user_info-data">
+                  <p v-for="confirmation in period.rentalConfirmations" :key="confirmation">
+                    {{ getRentalConfirmationDisplayText(confirmation) }}
+                  </p>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
 
-      <div class="user_section">
+      <!-- Якщо немає історії оренди, показуємо заглушку -->
+      <div v-else class="user_section">
+        <span class="user_section-title">Історія оренди</span>
+        <div class="user_history">
+          <span class="user_history-title">Інформація буде додана пізніше</span>
+        </div>
+      </div>
+
+<!-- Додаткова інформація - показуємо тільки якщо є хоча б одне поле -->
+      <div v-if="hasAdditionalInfo" class="user_section">
         <span class="user_section-title">Додаткова інформація</span>
         <ul class="user_list">
-          <li class="user_info">
+          <li v-if="userData?.additionalInfo?.languagesText" class="user_info">
             <img src="../img/icons/language.svg" alt="language">
             <div class="user_info-data">
-              <p>{{ userData?.additionalInfo?.[0]?.value || 'Немає інформації' }}</p>
+              <p>{{ userData.additionalInfo.languagesText }}</p>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.additionalInfo?.petsText" class="user_info">
             <img src="../img/icons/pets.svg" alt="pets">
             <div class="user_info-data">
-              <p>{{ userData?.additionalInfo?.[1]?.value || 'Немає інформації' }}</p>
+              <p>{{ userData.additionalInfo.petsText }}</p>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.additionalInfo?.flatmates" class="user_info">
             <img src="../img/icons/flatmates.svg" alt="flatmates">
             <div class="user_info-data">
-              <p>{{ userData?.additionalInfo?.[2]?.value || 'Немає інформації' }}</p>
+              <p>{{ getFlatmatesDisplayText(userData.additionalInfo.flatmates) }}</p>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.additionalInfo?.smoking !== null
+          && userData?.additionalInfo?.smoking !== undefined" class="user_info">
             <img src="../img/icons/smoke.svg" alt="smoke">
             <div class="user_info-data">
-              <p>{{ userData?.additionalInfo?.[3]?.value || 'Немає інформації' }}</p>
+              <p>{{ userData.additionalInfo.smoking ? 'Палить' : 'Не палить' }}</p>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.additionalInfo?.budget" class="user_info">
             <img src="../img/icons/money.svg" alt="money">
             <div class="user_info-data">
-              <p>{{ userData?.additionalInfo?.[4]?.value || 'Немає інформації' }}</p>
+              <p>Бюджет: {{ getBudgetDisplayText(userData.additionalInfo.budget) }}</p>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.additionalInfo?.rentalDuration" class="user_info">
             <img src="../img/icons/time.svg" alt="time">
             <div class="user_info-data">
-              <p>{{ userData?.additionalInfo?.[5]?.value || 'Немає інформації' }}</p>
+              <p>{{ getRentalDurationDisplayText(userData.additionalInfo.rentalDuration) }}</p>
             </div>
           </li>
-          <li class="user_info">
+          <li v-if="userData?.additionalInfo?.moveInDateText" class="user_info">
             <img src="../img/icons/calendar.svg" alt="calendar">
             <div class="user_info-data">
-              <p>{{ userData?.additionalInfo?.[6]?.value || 'Немає інформації' }}</p>
+              <p>{{ userData.additionalInfo.moveInDateText }}</p>
             </div>
           </li>
         </ul>
@@ -180,9 +195,18 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { getUserByUsername } from '@/services/userService';
+import {
+  getUserByProfileId,
+  SALARY_RANGES,
+  INCOME_DOCUMENTS,
+  WORK_DURATION,
+  FLATMATE_OPTIONS,
+  BUDGET_RANGES,
+  RENTAL_DURATION,
+  RENTAL_CONFIRMATIONS,
+} from '@/services/userService';
 import Header from '../components/Header.vue';
 import Gradient from '../components/Gradient.vue';
 
@@ -200,32 +224,79 @@ export default {
     const loading = ref(true);
     const error = ref(null);
 
+    // Computed властивості для перевірки наявності даних
+    const hasSocialMedia = computed(() => {
+      if (!userData.value?.socialMedia) return false;
+      const social = userData.value.socialMedia;
+      return social.whatsapp || social.instagram || social.facebook || social.telegram;
+    });
+
+    const hasContactInfo = computed(() => {
+      if (!userData.value?.contact) return false;
+      return userData.value.contact.phone || userData.value.contact.email;
+    });
+
+    const hasWorkplaceInfo = computed(() => {
+      if (!userData.value?.workplace) return false;
+      const { workplace } = userData.value;
+      return workplace.workInfo || workplace.salaryRange || workplace.workDuration;
+    });
+
+    const hasAdditionalInfo = computed(() => {
+      if (!userData.value?.additionalInfo) return false;
+      const info = userData.value.additionalInfo;
+      return info.languagesText
+         || info.petsText
+         || info.flatmates
+         || (info.smoking !== null && info.smoking !== undefined)
+         || info.budget
+         || info.rentalDuration
+         || info.moveInDateText;
+    });
+
+    const hasRentalHistory = computed(() => userData.value?.rentalHistory
+         && Array.isArray(userData.value.rentalHistory)
+         && userData.value.rentalHistory.length > 0);
+
+    const getSalaryDisplayText = (salaryRange) => SALARY_RANGES[salaryRange]?.displayText || '';
+
+    const getIncomeDocumentDisplayText = (incomeDocument) => INCOME_DOCUMENTS[incomeDocument]?.displayText || '';
+
+    const getWorkDurationDisplayText = (workDuration) => WORK_DURATION[workDuration]?.displayText || '';
+
+    const getFlatmatesDisplayText = (flatmates) => FLATMATE_OPTIONS[flatmates]?.displayText || '';
+
+    const getBudgetDisplayText = (budget) => BUDGET_RANGES[budget]?.displayText || '';
+
+    const getRentalDurationDisplayText = (rentalDuration) => RENTAL_DURATION[rentalDuration]?.displayText || '';
+
+    const getRentalConfirmationDisplayText = (confirmation) => RENTAL_CONFIRMATIONS[confirmation]?.displayText || '';
+
     // Функція завантаження користувача
     const loadUser = async () => {
       try {
         loading.value = true;
         error.value = null;
 
-        const { username } = route.params;
+        const { profileId } = route.params;
 
-        if (!username) {
-          error.value = 'Username не вказано';
+        if (!profileId) {
+          error.value = 'Profile ID не вказано';
           return;
         }
 
-        console.log('Завантаження користувача:', username);
-        const user = await getUserByUsername(username);
+        console.log('Завантаження користувача:', profileId);
+        const user = await getUserByProfileId(profileId);
 
         if (user) {
           userData.value = user;
           console.log('Користувач завантажений:', user);
         } else {
-          console.log('Користувача не знайдено, але показуємо сторінку');
-          userData.value = {}; // Порожній об'єкт щоб показати сторінку
+          error.value = 'Користувача не знайдено';
         }
       } catch (err) {
         console.error('Помилка завантаження користувача:', err);
-        userData.value = {}; // Показуємо сторінку з fallback даними
+        error.value = 'Помилка завантаження даних';
       } finally {
         loading.value = false;
       }
@@ -242,6 +313,18 @@ export default {
       loading,
       error,
       loadUser,
+      hasSocialMedia,
+      hasContactInfo,
+      hasWorkplaceInfo,
+      hasAdditionalInfo,
+      hasRentalHistory,
+      getSalaryDisplayText,
+      getIncomeDocumentDisplayText,
+      getWorkDurationDisplayText,
+      getFlatmatesDisplayText,
+      getBudgetDisplayText,
+      getRentalDurationDisplayText,
+      getRentalConfirmationDisplayText,
     };
   },
 };

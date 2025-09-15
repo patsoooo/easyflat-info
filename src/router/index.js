@@ -9,10 +9,18 @@ const routes = [
     component: HomeView,
   },
   {
-    path: '/user/:username',
+    path: '/:profileId',
     name: 'View',
     component: View,
     props: true,
+    beforeEnter: (to, from, next) => {
+      const profileIdPattern = /^[a-z0-9]{3,4}-[a-z0-9]{3,4}-[a-z0-9]{3,4}$/;
+      if (profileIdPattern.test(to.params.profileId)) {
+        next();
+      } else {
+        next('/');
+      }
+    },
   },
 ];
 
