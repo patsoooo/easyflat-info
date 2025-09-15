@@ -1,14 +1,29 @@
 <template>
-  <div class="container">
+  <div class="container-xl">
     <Header />
-    <div class="user">
+  </div>
+  <div class="container">
+    <Gradient />
+
+    <!-- Завантаження -->
+    <div v-if="loading" class="loading">
+      Завантаження...
+    </div>
+
+    <!-- Помилка -->
+    <div v-else-if="error" class="error">
+      {{ error }}
+    </div>
+
+    <!-- Дані користувача -->
+    <div v-else class="user">
       <div class="user_data">
-        <div class="user_data-photo">JW</div>
+        <div class="user_data-photo">{{ userData?.initials || 'N/A' }}</div>
         <div class="user_data-name">
-          Pan John Watson
+          {{ userData?.name || 'Немає інформації' }}
         </div>
         <div class="user_data-desc">
-          Українець, більше 10 років в Польщі
+          {{ userData?.description || 'Немає інформації' }}
         </div>
         <ul class="user_data-social">
           <li>
@@ -18,7 +33,7 @@
           </li>
           <li>
             <a href="" target="_blank">
-              <img src="../img/social/tg.svg" alt="tg">
+              <img src="../img/social/instagram.svg" alt="instagram">
             </a>
           </li>
           <li>
@@ -28,141 +43,134 @@
           </li>
         </ul>
       </div>
+
       <div class="user_section">
         <span class="user_section-title">Контакт</span>
         <ul class="user_list">
           <li class="user_info">
             <img src="../img/icons/phone.svg" alt="phone">
             <div class="user_info-data">
-              <p>+48 799 098 123</p>
+              <p>{{ userData?.contact?.[0]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
           <li class="user_info">
             <img src="../img/icons/email.svg" alt="email">
             <div class="user_info-data">
-              <p>patso55ostap@gmail.com</p>
+              <p>{{ userData?.contact?.[1]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
         </ul>
       </div>
+
       <div class="user_section">
         <span class="user_section-title">Місце роботи</span>
         <ul class="user_list">
           <li class="user_info">
             <img src="../img/icons/work.svg" alt="work">
             <div class="user_info-data">
-              <p>Microsoft, Software Engineer</p>
+              <p>{{ userData?.workplace?.[0]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
           <li class="user_info">
-            <img src="../img/icons/email.svg" alt="email">
+            <img src="../img/icons/money.svg" alt="money">
             <div class="user_info-data">
-              <p>$8,000/місяць</p>
-              <span>Дані підтверджено на основі доданого документу</span>
+              <p>{{ userData?.workplace?.[1]?.value || 'Немає інформації' }}</p>
+              <span v-if="userData?.workplace?.[1]?.description">
+                {{ userData.workplace[1].description }}</span>
             </div>
           </li>
           <li class="user_info">
             <img src="../img/icons/time.svg" alt="time">
             <div class="user_info-data">
-              <p>Працює більше 24 місяців</p>
+              <p>{{ userData?.workplace?.[2]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
         </ul>
       </div>
+
       <div class="user_section">
         <span class="user_section-title">Історія оренди</span>
         <div class="user_history">
-          <span class="user_history-title">Березень 2024 - до зараз</span>
-          <ul class="user_list">
-            <li class="user_info">
-              <img src="../img/icons/location.svg" alt="location">
-              <div class="user_info-data">
-                <p>Bytomska 21A</p>
-                <span>Краків, Польща</span>
-              </div>
-            </li>
-            <li class="user_info">
-              <img src="../img/icons/money.svg" alt="money">
-              <div class="user_info-data">
-                <p>94% платежів надходило вчасно</p>
-                <span>Дані підтверджено на основі доданих оплат з банку</span>
-              </div>
-            </li>
-            <li class="user_info">
-              <img src="../img/icons/phone.svg" alt="phone">
-              <div class="user_info-data">
-                <p>Номер орендодавця: +48 799 098 123</p>
-              </div>
-            </li>
-          </ul>
-          <span class="user_history-title">Жовтень 2016 - Березень 2020</span>
-          <ul class="user_list">
-            <li class="user_info">
-              <img src="../img/icons/location.svg" alt="location">
-              <div class="user_info-data">
-                <p>Krośnienska 36</p>
-                <span>Жешув, Польща</span>
-              </div>
-            </li>
-            <li class="user_info">
-              <img src="../img/icons/money.svg" alt="money">
-              <div class="user_info-data">
-                <p>73% платежів надходило вчасно</p>
-                <span>Дані підтверджено на основі доданих оплат з банку</span>
-              </div>
-            </li>
-            <li class="user_info">
-              <img src="../img/icons/phone.svg" alt="phone">
-              <div class="user_info-data">
-                <p>Номер орендодавця: +48 799 098 123</p>
-              </div>
-            </li>
-          </ul>
+          <div v-if="userData?.rentalHistory?.length > 0">
+            <div v-for="(period, index) in userData.rentalHistory"
+            :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
+            :key="index">
+              <span class="user_history-title">{{ period?.period || 'Невідомий період' }}</span>
+              <ul class="user_list">
+                <li class="user_info">
+                  <img src="../img/icons/location.svg" alt="location">
+                  <div class="user_info-data">
+                    <p>{{ period?.items?.[0]?.value || 'Немає інформації' }}</p>
+                    <span v-if="period?.items?.[0]?.description">
+                      {{ period.items[0].description }}</span>
+                  </div>
+                </li>
+                <li class="user_info">
+                  <img src="../img/icons/money.svg" alt="money">
+                  <div class="user_info-data">
+                    <p>{{ period?.items?.[1]?.value || 'Немає інформації' }}</p>
+                    <span v-if="period?.items?.[1]?.description">
+                      {{ period.items[1].description }}</span>
+                  </div>
+                </li>
+                <li class="user_info">
+                  <img src="../img/icons/phone.svg" alt="phone">
+                  <div class="user_info-data">
+                    <p>{{ period?.items?.[2]?.value || 'Немає інформації' }}</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div v-else>
+            <span class="user_history-title">Немає інформації про оренду</span>
+          </div>
         </div>
       </div>
+
       <div class="user_section">
         <span class="user_section-title">Додаткова інформація</span>
         <ul class="user_list">
           <li class="user_info">
             <img src="../img/icons/language.svg" alt="language">
             <div class="user_info-data">
-              <p>Володіння мовами: Англійська, Українська і Польська</p>
+              <p>{{ userData?.additionalInfo?.[0]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
           <li class="user_info">
-            <img src="../img/icons/email.svg" alt="email">
+            <img src="../img/icons/pets.svg" alt="pets">
             <div class="user_info-data">
-              <p>Домашніх тварин немає</p>
+              <p>{{ userData?.additionalInfo?.[1]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
           <li class="user_info">
-            <img src="../img/icons/phone.svg" alt="phone">
+            <img src="../img/icons/flatmates.svg" alt="flatmates">
             <div class="user_info-data">
-              <p>Буду знімати житло з дівчиною</p>
+              <p>{{ userData?.additionalInfo?.[2]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
           <li class="user_info">
-            <img src="../img/icons/phone.svg" alt="phone">
+            <img src="../img/icons/smoke.svg" alt="smoke">
             <div class="user_info-data">
-              <p>Не палимо</p>
+              <p>{{ userData?.additionalInfo?.[3]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
           <li class="user_info">
             <img src="../img/icons/money.svg" alt="money">
             <div class="user_info-data">
-              <p>Бюджет: до 4000зл/місяць</p>
+              <p>{{ userData?.additionalInfo?.[4]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
           <li class="user_info">
             <img src="../img/icons/time.svg" alt="time">
             <div class="user_info-data">
-              <p>Оренда мінімум на рік</p>
+              <p>{{ userData?.additionalInfo?.[5]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
           <li class="user_info">
             <img src="../img/icons/calendar.svg" alt="calendar">
             <div class="user_info-data">
-              <p>Бажана дата заселення: 1 жовтня 2025</p>
+              <p>{{ userData?.additionalInfo?.[6]?.value || 'Немає інформації' }}</p>
             </div>
           </li>
         </ul>
@@ -170,32 +178,96 @@
     </div>
   </div>
 </template>
+
 <script>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { getUserByUsername } from '@/services/userService';
 import Header from '../components/Header.vue';
+import Gradient from '../components/Gradient.vue';
 
 export default {
   name: 'ViewUser',
   components: {
     Header,
+    Gradient,
+  },
+  setup() {
+    const route = useRoute();
+
+    // Реактивні змінні
+    const userData = ref(null);
+    const loading = ref(true);
+    const error = ref(null);
+
+    // Функція завантаження користувача
+    const loadUser = async () => {
+      try {
+        loading.value = true;
+        error.value = null;
+
+        const { username } = route.params;
+
+        if (!username) {
+          error.value = 'Username не вказано';
+          return;
+        }
+
+        console.log('Завантаження користувача:', username);
+        const user = await getUserByUsername(username);
+
+        if (user) {
+          userData.value = user;
+          console.log('Користувач завантажений:', user);
+        } else {
+          console.log('Користувача не знайдено, але показуємо сторінку');
+          userData.value = {}; // Порожній об'єкт щоб показати сторінку
+        }
+      } catch (err) {
+        console.error('Помилка завантаження користувача:', err);
+        userData.value = {}; // Показуємо сторінку з fallback даними
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // Викликаємо завантаження при монтуванні компонента
+    onMounted(() => {
+      loadUser();
+    });
+
+    // Повертаємо все, що потрібно в template
+    return {
+      userData,
+      loading,
+      error,
+      loadUser,
+    };
   },
 };
 </script>
+
 <style lang="scss">
-.user {
-  padding: 4.8rem 2.4rem 2.4rem;
+.loading, .error {
+  padding: 2rem;
+  text-align: center;
   background-color: $bg-white;
   border-radius: 2rem;
+  margin-top: 2rem;
+}
+
+.error {
+  color: #e74c3c;
+}
+
+.user {
+  margin-bottom: 2rem;
   &_history {
     padding: 1.2rem 0;
     .user_list {
       margin-left: 3.6rem;
       position: relative;
       margin-bottom: 1.2rem;
-      &:last-child {
-        &::after {
-          display: none;
-        }
-      }
       &::after {
         content: '';
         position: absolute;
@@ -203,7 +275,8 @@ export default {
         left: -2.6rem;
         width: 0.16rem;
         height: 100%;
-        background-color: $text-grey-1;
+        background: $border-grey;
+        border-radius: 10rem;
       }
     }
     &-title {
@@ -221,8 +294,15 @@ export default {
         display: inline-block;
         width: 2rem;
         height: 2rem;
-        background-color: $text-grey-1;
+        border: 0.16rem solid $border-grey;
         border-radius: 100%;
+      }
+    }
+    .user_history-last {
+      .user_list {
+        &::after {
+          content: none;
+        }
       }
     }
   }
@@ -230,7 +310,8 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 4.4rem;
+    padding: 2.4rem 0;
+    margin-bottom: 1.6rem;
     &-photo {
       display: flex;
       align-items: center;
@@ -238,34 +319,41 @@ export default {
       width: 12rem;
       height: 12rem;
       border-radius: 100%;
-      background-color: $bg-grey;
+      background: rgba(0, 0, 0, 0.06);
       margin-bottom: 1.6rem;
       @include text-24-bold;
     }
     &-name {
       @include text-24-bold;
       color: $text-black;
-      margin-bottom: .8rem;
+      margin-bottom: .4rem;
     }
     &-desc {
       @include text-15-regular;
       color: $text-grey-6;
-      margin-bottom: 2.4rem;
+      margin-bottom: 2rem;
     }
     &-social {
       display: flex;
       align-items: center;
       li {
         padding: 0 0.8rem;
+        a {
+          width: 3.2rem;
+          img {
+            width: 100%;
+          }
+        }
       }
     }
   }
   &_section {
-    padding-bottom: 0.8rem;
-    border-bottom: 0.12rem solid $border-grey;
-    margin-bottom: 2.8rem;
+    padding: 1.6rem 1.6rem 1.2rem 2rem;
+    background-color: $bg-white;
+    border: .08rem solid $border-grey;
+    border-radius: 1.6rem;
+    margin-bottom: 1.6rem;
     &:last-child {
-      border-bottom: none;
       margin-bottom: 0;
     }
     &-title {
@@ -284,7 +372,7 @@ export default {
     padding: 1.2rem 0;
     &-data {
       span {
-        @include text-15-regular;
+        @include text-13-regular;
         color: $text-grey-6;
       }
     }
@@ -293,7 +381,7 @@ export default {
       margin-right: 1.2rem;
     }
     p {
-      @include text-17-medium;
+      @include text-15-medium;
       color: $text-black;
     }
   }

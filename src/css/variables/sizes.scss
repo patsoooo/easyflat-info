@@ -34,3 +34,9 @@
 @mixin text-17-medium {
   @include text-style(1.7rem, 2.2rem, -0.041rem, $font-medium);
 }
+
+// 13 px
+
+@mixin text-13-regular {
+  @include text-style(1.3rem, 1.6rem, -0.008rem, $font-regular);
+}

@@ -132,3 +132,12 @@ a:hover {
     max-width: 62.4rem;
   }
 }
+
+.container-xl {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 1.2rem;
+  @media (min-width: 1240px) {
+    max-width: 124.4rem;
+  }
+}

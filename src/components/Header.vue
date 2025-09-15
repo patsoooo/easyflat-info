@@ -24,5 +24,10 @@ export default {
     @include text-15-semibold;
     color: $text-black;
   }
+  &_logo {
+    img {
+      height: 2.4rem;
+    }
+  }
 }
 </style>
