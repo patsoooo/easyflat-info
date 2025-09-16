@@ -1,193 +1,195 @@
 <template>
-  <div class="container-xl">
-    <Header />
-  </div>
-  <div class="container">
-    <Gradient />
-
-    <!-- Завантаження -->
-    <div v-if="loading" class="loading">
-      Завантаження...
+  <div class="view">
+    <div class="container-xl">
+      <Header />
     </div>
+    <div class="container">
+      <Gradient />
 
-    <!-- Помилка -->
-    <div v-else-if="error" class="error">
-      {{ error }}
-    </div>
+      <!-- Завантаження -->
+      <div v-if="loading" class="loading">
+        Завантаження...
+      </div>
 
-    <!-- Дані користувача -->
-    <div v-else class="user">
-      <div class="user_data">
-        <div class="user_data-photo">{{ userData?.initials || 'N/A' }}</div>
-        <div class="user_data-name">
-          {{ userData?.name || 'Немає інформації' }}
+      <!-- Помилка -->
+      <div v-else-if="error" class="error">
+        {{ error }}
+      </div>
+
+      <!-- Дані користувача -->
+      <div v-else class="user">
+        <div class="user_data">
+          <div class="user_data-photo">{{ userData?.initials || 'N/A' }}</div>
+          <div class="user_data-name">
+            {{ userData?.name || 'Немає інформації' }}
+          </div>
+          <div class="user_data-desc">
+            {{ translatedDescription || 'Немає інформації' }}
+          </div>
+
+          <!-- Соціальні мережі - показуємо тільки якщо є хоча б одна -->
+          <ul v-if="hasSocialMedia" class="user_data-social">
+            <li v-if="userData?.socialMedia?.whatsapp">
+              <a :href="userData.socialMedia.whatsapp" target="_blank">
+                <img src="../img/social/whatsapp.svg" alt="whatsapp">
+              </a>
+            </li>
+            <li v-if="userData?.socialMedia?.instagram">
+              <a :href="userData.socialMedia.instagram" target="_blank">
+                <img src="../img/social/instagram.svg" alt="instagram">
+              </a>
+            </li>
+            <li v-if="userData?.socialMedia?.facebook">
+              <a :href="userData.socialMedia.facebook" target="_blank">
+                <img src="../img/social/fb.svg" alt="facebook">
+              </a>
+            </li>
+            <li v-if="userData?.socialMedia?.telegram">
+              <a :href="userData.socialMedia.telegram" target="_blank">
+                <img src="../img/social/linkedin.svg" alt="telegram">
+              </a>
+            </li>
+          </ul>
         </div>
-        <div class="user_data-desc">
-          {{ translatedDescription || 'Немає інформації' }}
+
+        <!-- Контакт - показуємо тільки якщо є телефон або email -->
+        <div v-if="hasContactInfo" class="user_section">
+          <span class="user_section-title">{{ $t('sections.contact') }}</span>
+          <ul class="user_list">
+            <li v-if="userData?.contact?.phone" class="user_info">
+              <img src="../img/icons/phone.svg" alt="phone">
+              <div class="user_info-data">
+                <p>{{ userData.contact.phone }}</p>
+              </div>
+            </li>
+            <li v-if="userData?.contact?.email" class="user_info">
+              <img src="../img/icons/email.svg" alt="email">
+              <div class="user_info-data">
+                <p>{{ userData.contact.email }}</p>
+              </div>
+            </li>
+          </ul>
         </div>
 
-        <!-- Соціальні мережі - показуємо тільки якщо є хоча б одна -->
-        <ul v-if="hasSocialMedia" class="user_data-social">
-          <li v-if="userData?.socialMedia?.whatsapp">
-            <a :href="userData.socialMedia.whatsapp" target="_blank">
-              <img src="../img/social/whatsapp.svg" alt="whatsapp">
-            </a>
-          </li>
-          <li v-if="userData?.socialMedia?.instagram">
-            <a :href="userData.socialMedia.instagram" target="_blank">
-              <img src="../img/social/instagram.svg" alt="instagram">
-            </a>
-          </li>
-          <li v-if="userData?.socialMedia?.facebook">
-            <a :href="userData.socialMedia.facebook" target="_blank">
-              <img src="../img/social/fb.svg" alt="facebook">
-            </a>
-          </li>
-          <li v-if="userData?.socialMedia?.telegram">
-            <a :href="userData.socialMedia.telegram" target="_blank">
-              <img src="../img/social/linkedin.svg" alt="telegram">
-            </a>
-          </li>
-        </ul>
-      </div>
+        <!-- Місце роботи -->
+        <div v-if="hasWorkplaceInfo" class="user_section">
+          <span class="user_section-title">{{ $t('sections.workplace') }}</span>
+          <ul class="user_list">
+            <li v-if="userData?.workplace?.workInfo" class="user_info">
+              <img src="../img/icons/work.svg" alt="work">
+              <div class="user_info-data">
+                <p>{{ userData.workplace.workInfo }}</p>
+              </div>
+            </li>
+            <li v-if="userData?.workplace?.salaryRange" class="user_info">
+              <img src="../img/icons/money.svg" alt="money">
+              <div class="user_info-data">
+                <p>{{ getTranslatedSalaryRangeText() }}</p>
+                <span v-if="userData?.workplace?.incomeDocument">
+                  {{ getTranslatedIncomeDocumentText() }}
+                </span>
+              </div>
+            </li>
+            <li v-if="userData?.workplace?.workDuration" class="user_info">
+              <img src="../img/icons/time.svg" alt="time">
+              <div class="user_info-data">
+                <p>{{ getTranslatedWorkDurationText() }}</p>
+              </div>
+            </li>
+          </ul>
+        </div>
 
-      <!-- Контакт - показуємо тільки якщо є телефон або email -->
-      <div v-if="hasContactInfo" class="user_section">
-        <span class="user_section-title">{{ $t('sections.contact') }}</span>
-        <ul class="user_list">
-          <li v-if="userData?.contact?.phone" class="user_info">
-            <img src="../img/icons/phone.svg" alt="phone">
-            <div class="user_info-data">
-              <p>{{ userData.contact.phone }}</p>
+        <!-- Історія оренди -->
+        <div v-if="hasRentalHistory" class="user_section">
+          <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
+          <div class="user_history">
+            <div v-for="(period, index) in userData.rentalHistory"
+            :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
+            :key="index">
+              <span class="user_history-title">{{ getTranslatedPeriod(period) }}</span>
+              <ul class="user_list">
+                <li v-if="period?.address" class="user_info">
+                  <img src="../img/icons/location.svg" alt="location">
+                  <div class="user_info-data">
+                    <p>{{ period.address }}</p>
+                    <span v-if="period?.city">{{ getTranslatedLocationText(period.city) }}</span>
+                  </div>
+                </li>
+                <li v-if="period?.landlordContact" class="user_info">
+                  <img src="../img/icons/phone.svg" alt="phone">
+                  <div class="user_info-data">
+                    <p>{{ getTranslatedLandlordContactText(period.landlordContact) }}</p>
+                  </div>
+                </li>
+                <li v-if="period?.rentalConfirmation" class="user_info">
+                  <img src="../img/icons/money.svg" alt="money">
+                  <div class="user_info-data">
+                    <p>{{ getTranslatedRentalConfirmationText(period.rentalConfirmation) }}</p>
+                  </div>
+                </li>
+              </ul>
             </div>
-          </li>
-          <li v-if="userData?.contact?.email" class="user_info">
-            <img src="../img/icons/email.svg" alt="email">
-            <div class="user_info-data">
-              <p>{{ userData.contact.email }}</p>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Місце роботи -->
-      <div v-if="hasWorkplaceInfo" class="user_section">
-        <span class="user_section-title">{{ $t('sections.workplace') }}</span>
-        <ul class="user_list">
-          <li v-if="userData?.workplace?.workInfo" class="user_info">
-            <img src="../img/icons/work.svg" alt="work">
-            <div class="user_info-data">
-              <p>{{ userData.workplace.workInfo }}</p>
-            </div>
-          </li>
-          <li v-if="userData?.workplace?.salaryRange" class="user_info">
-            <img src="../img/icons/money.svg" alt="money">
-            <div class="user_info-data">
-              <p>{{ getTranslatedSalaryRangeText() }}</p>
-              <span v-if="userData?.workplace?.incomeDocument">
-                {{ getTranslatedIncomeDocumentText() }}
-              </span>
-            </div>
-          </li>
-          <li v-if="userData?.workplace?.workDuration" class="user_info">
-            <img src="../img/icons/time.svg" alt="time">
-            <div class="user_info-data">
-              <p>{{ getTranslatedWorkDurationText() }}</p>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Історія оренди -->
-      <div v-if="hasRentalHistory" class="user_section">
-        <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
-        <div class="user_history">
-          <div v-for="(period, index) in userData.rentalHistory"
-          :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
-          :key="index">
-            <span class="user_history-title">{{ getTranslatedPeriod(period) }}</span>
-            <ul class="user_list">
-              <li v-if="period?.address" class="user_info">
-                <img src="../img/icons/location.svg" alt="location">
-                <div class="user_info-data">
-                  <p>{{ period.address }}</p>
-                  <span v-if="period?.city">{{ getTranslatedLocationText(period.city) }}</span>
-                </div>
-              </li>
-              <li v-if="period?.landlordContact" class="user_info">
-                <img src="../img/icons/phone.svg" alt="phone">
-                <div class="user_info-data">
-                  <p>{{ getTranslatedLandlordContactText(period.landlordContact) }}</p>
-                </div>
-              </li>
-              <li v-if="period?.rentalConfirmation" class="user_info">
-                <img src="../img/icons/money.svg" alt="money">
-                <div class="user_info-data">
-                  <p>{{ getTranslatedRentalConfirmationText(period.rentalConfirmation) }}</p>
-                </div>
-              </li>
-            </ul>
           </div>
         </div>
-      </div>
 
-      <!-- Якщо немає історії оренди, показуємо заглушку -->
-      <div v-else class="user_section">
-        <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
-        <div class="user_history">
-          <span class="user_history-title">{{ getTranslatedRentalHistoryFallbackText() }}</span>
+        <!-- Якщо немає історії оренди, показуємо заглушку -->
+        <div v-else class="user_section">
+          <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
+          <div class="user_history">
+            <span class="user_history-title">{{ getTranslatedRentalHistoryFallbackText() }}</span>
+          </div>
         </div>
-      </div>
 
-<!-- Додаткова інформація - показуємо тільки якщо є хоча б одне поле -->
-      <div v-if="hasAdditionalInfo" class="user_section">
-        <span class="user_section-title">{{ $t('sections.additionalInfo') }}</span>
-        <ul class="user_list">
-          <li v-if="userData?.additionalInfo?.languages?.length > 0" class="user_info">
-            <img src="../img/icons/language.svg" alt="language">
-            <div class="user_info-data">
-              <p>{{ getTranslatedLanguagesText() }}</p>
-            </div>
-          </li>
-          <li v-if="userData?.additionalInfo?.hasPets !== null
-          && userData?.additionalInfo?.hasPets !== undefined" class="user_info">
-            <img src="../img/icons/pets.svg" alt="pets">
-            <div class="user_info-data">
-              <p>{{ getTranslatedPetsText() }}</p>
-            </div>
-          </li>
-          <li v-if="userData?.additionalInfo?.flatmates" class="user_info">
-            <img src="../img/icons/flatmates.svg" alt="flatmates">
-            <div class="user_info-data">
-              <p>{{ getTranslatedFlmatmatesText() }}</p>
-            </div>
-          </li>
-          <li v-if="userData?.additionalInfo?.smoking !== null
-          && userData?.additionalInfo?.smoking !== undefined" class="user_info">
-            <img src="../img/icons/smoke.svg" alt="smoke">
-            <div class="user_info-data">
-              <p>{{ getTranslatedSmokingText() }}</p>
-            </div>
-          </li>
-          <li v-if="userData?.additionalInfo?.budget" class="user_info">
-            <img src="../img/icons/money.svg" alt="money">
-            <div class="user_info-data">
-              <p>{{ getTranslatedBudgetText() }}</p>
-            </div>
-          </li>
-          <li v-if="userData?.additionalInfo?.rentalDuration" class="user_info">
-            <img src="../img/icons/time.svg" alt="time">
-            <div class="user_info-data">
-              <p>{{ getTranslatedRentalDurationText() }}</p>
-            </div>
-          </li>
-          <li v-if="userData?.additionalInfo?.moveInDate" class="user_info">
-            <img src="../img/icons/calendar.svg" alt="calendar">
-            <div class="user_info-data">
-              <p>{{ getTranslatedMoveInDateText() }}</p>
-            </div>
-          </li>
-        </ul>
+  <!-- Додаткова інформація - показуємо тільки якщо є хоча б одне поле -->
+        <div v-if="hasAdditionalInfo" class="user_section">
+          <span class="user_section-title">{{ $t('sections.additionalInfo') }}</span>
+          <ul class="user_list">
+            <li v-if="userData?.additionalInfo?.languages?.length > 0" class="user_info">
+              <img src="../img/icons/language.svg" alt="language">
+              <div class="user_info-data">
+                <p>{{ getTranslatedLanguagesText() }}</p>
+              </div>
+            </li>
+            <li v-if="userData?.additionalInfo?.hasPets !== null
+            && userData?.additionalInfo?.hasPets !== undefined" class="user_info">
+              <img src="../img/icons/pets.svg" alt="pets">
+              <div class="user_info-data">
+                <p>{{ getTranslatedPetsText() }}</p>
+              </div>
+            </li>
+            <li v-if="userData?.additionalInfo?.flatmates" class="user_info">
+              <img src="../img/icons/flatmates.svg" alt="flatmates">
+              <div class="user_info-data">
+                <p>{{ getTranslatedFlmatmatesText() }}</p>
+              </div>
+            </li>
+            <li v-if="userData?.additionalInfo?.smoking !== null
+            && userData?.additionalInfo?.smoking !== undefined" class="user_info">
+              <img src="../img/icons/smoke.svg" alt="smoke">
+              <div class="user_info-data">
+                <p>{{ getTranslatedSmokingText() }}</p>
+              </div>
+            </li>
+            <li v-if="userData?.additionalInfo?.budget" class="user_info">
+              <img src="../img/icons/money.svg" alt="money">
+              <div class="user_info-data">
+                <p>{{ getTranslatedBudgetText() }}</p>
+              </div>
+            </li>
+            <li v-if="userData?.additionalInfo?.rentalDuration" class="user_info">
+              <img src="../img/icons/time.svg" alt="time">
+              <div class="user_info-data">
+                <p>{{ getTranslatedRentalDurationText() }}</p>
+              </div>
+            </li>
+            <li v-if="userData?.additionalInfo?.moveInDate" class="user_info">
+              <img src="../img/icons/calendar.svg" alt="calendar">
+              <div class="user_info-data">
+                <p>{{ getTranslatedMoveInDateText() }}</p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -428,7 +430,12 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.view {
+  width: 100%;
+  height: 100%;
+  background-color: $bg-grey !important;
+}
 .loading, .error {
   padding: 2rem;
   text-align: center;
@@ -439,132 +446,5 @@ export default {
 
 .error {
   color: #e74c3c;
-}
-
-.user {
-  margin-bottom: 2rem;
-  &_history {
-    padding: 1.2rem 0;
-    .user_list {
-      margin-left: 3.6rem;
-      position: relative;
-      margin-bottom: 1.2rem;
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -2.6rem;
-        width: 0.16rem;
-        height: 100%;
-        background: $border-grey;
-        border-radius: 10rem;
-      }
-    }
-    &-title {
-      display: block;
-      @include text-15-medium;
-      color: $text-grey-6;
-      margin-left: 3.6rem;
-      position: relative;
-      margin-bottom: 1.2rem;
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -3.6rem;
-        display: inline-block;
-        width: 2rem;
-        height: 2rem;
-        border: 0.16rem solid $border-grey;
-        border-radius: 100%;
-      }
-    }
-    .user_history-last {
-      .user_list {
-        &::after {
-          content: none;
-        }
-      }
-    }
-  }
-  &_data {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2.4rem 0;
-    margin-bottom: 1.6rem;
-    &-photo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 12rem;
-      height: 12rem;
-      border-radius: 100%;
-      background: rgba(0, 0, 0, 0.06);
-      margin-bottom: 1.6rem;
-      @include text-24-bold;
-    }
-    &-name {
-      @include text-24-bold;
-      color: $text-black;
-      margin-bottom: .4rem;
-    }
-    &-desc {
-      @include text-15-regular;
-      color: $text-grey-6;
-      margin-bottom: 2rem;
-    }
-    &-social {
-      display: flex;
-      align-items: center;
-      li {
-        padding: 0 0.8rem;
-        a {
-          width: 3.2rem;
-          img {
-            width: 100%;
-          }
-        }
-      }
-    }
-  }
-  &_section {
-    padding: 1.6rem 1.6rem 1.2rem 2rem;
-    background-color: $bg-white;
-    border: .08rem solid $border-grey;
-    border-radius: 1.6rem;
-    margin-bottom: 1.6rem;
-    &:last-child {
-      margin-bottom: 0;
-    }
-    &-title {
-      display: block;
-      @include text-15-medium;
-      color: $text-grey-6;
-      margin-bottom: .8rem;
-      &.history {
-        margin-top: 3.2rem;
-      }
-    }
-  }
-  &_info {
-    display: flex;
-    align-items: center;
-    padding: 1.2rem 0;
-    &-data {
-      span {
-        @include text-13-regular;
-        color: $text-grey-6;
-      }
-    }
-    img {
-      width: 2.4rem;
-      margin-right: 1.2rem;
-    }
-    p {
-      @include text-15-medium;
-      color: $text-black;
-    }
-  }
 }
 </style>

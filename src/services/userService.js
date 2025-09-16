@@ -1,6 +1,7 @@
 import db from '@/firebase/config';
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc,
+  collection, query, where, getDocs,
 } from 'firebase/firestore';
 
 // Константи для статусів
@@ -779,6 +780,8 @@ export const createUser = async (userData) => {
       citizenshipStatus,
       timeInPoland,
       description: generateDescription(citizenshipStatus, timeInPoland),
+      visible: true, // профіль видимий за замовчуванням
+      profileCompleted: true,
 
       // Соціальні мережі
       socialMedia: userData.socialMedia || {
@@ -1033,4 +1036,155 @@ export const validateUserData = (userData) => {
   }
 
   return errors;
+};
+
+// Генерація коду доступу (6-значний код)
+export const generateAccessCode = () => {
+  const chars = '0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i += 1) { // Виправлено: i += 1 замість i++
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+// Перевірка чи існує код доступу
+export const checkAccessCodeExists = async (accessCode) => {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('accessCode', '==', accessCode));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  } catch (error) {
+    console.error('Помилка при перевірці коду доступу:', error);
+    return false;
+  }
+};
+
+// Генерація унікального коду доступу
+export const generateUniqueAccessCode = async () => {
+  let accessCode;
+  let exists = true;
+
+  while (exists) {
+    accessCode = generateAccessCode();
+    // eslint-disable-next-line no-await-in-loop
+    exists = await checkAccessCodeExists(accessCode);
+  }
+
+  return accessCode;
+};
+
+// Отримати користувача за кодом доступу
+export const getUserByAccessCode = async (accessCode) => {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('accessCode', '==', accessCode));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0]; // Виправлено: userDoc замість doc
+      return { id: userDoc.id, ...userDoc.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Помилка при отриманні користувача за кодом:', error);
+    throw error;
+  }
+};
+
+// Створити користувача з кодом доступу (мінімальні дані)
+export const createUserWithAccessCode = async () => {
+  try {
+    const profileId = await generateUniqueProfileId();
+    const accessCode = await generateUniqueAccessCode();
+
+    const userDataWithDefaults = {
+      firstName: '',
+      lastName: '',
+      name: '',
+      initials: '',
+      citizenshipStatus: 'foreigner',
+      timeInPoland: 'less_than_1',
+      description: '',
+
+      // Код доступу та статуси
+      accessCode,
+      visible: true,
+      isActive: true,
+      profileCompleted: false, // чи заповнений профіль
+
+      // Порожні поля для майбутнього заповнення
+      socialMedia: {
+        whatsapp: null,
+        instagram: null,
+        facebook: null,
+        telegram: null,
+      },
+      contact: {
+        phone: null,
+        email: null,
+      },
+      workplace: {
+        company: null,
+        position: null,
+        workInfo: null,
+        salaryRange: null,
+        incomeDocument: null,
+        workDuration: null,
+      },
+      rentalHistory: [],
+      additionalInfo: {
+        languages: [],
+        languagesText: null,
+        hasPets: false,
+        petTypes: [],
+        petsText: null,
+        flatmates: null,
+        smoking: false,
+        budget: null,
+        rentalDuration: null,
+        moveInDate: null,
+        moveInDateText: null,
+      },
+
+      // Технічні дані
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const docRef = doc(db, 'users', profileId);
+    await setDoc(docRef, userDataWithDefaults);
+
+    return { profileId, accessCode, ...userDataWithDefaults };
+  } catch (error) {
+    console.error('Помилка при створенні користувача з кодом:', error);
+    throw error;
+  }
+};
+
+// Оновити базові дані користувача (ім'я, прізвище)
+export const updateUserBasicInfo = async (profileId, firstName, lastName) => {
+  try {
+    const updates = {
+      firstName: firstName?.trim() || '',
+      lastName: lastName?.trim() || '',
+      name: generateFullName(firstName, lastName),
+      initials: generateInitials(firstName, lastName),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Якщо є ім'я, вважаємо що профіль почав заповнюватись
+    if (firstName?.trim()) {
+      updates.profileCompleted = true;
+    }
+
+    const docRef = doc(db, 'users', profileId);
+    await updateDoc(docRef, updates);
+
+    return true;
+  } catch (error) {
+    console.error('Помилка при оновленні базової інформації:', error);
+    throw error;
+  }
 };
