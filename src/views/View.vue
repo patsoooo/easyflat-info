@@ -24,10 +24,10 @@
             {{ userData?.name || 'Немає інформації' }}
           </div>
           <div class="user_data-desc">
-            {{ translatedDescription || 'Немає інформації' }}
+            {{ getTranslatedDescription() || 'Немає інформації' }}
           </div>
 
-          <!-- Соціальні мережі - показуємо тільки якщо є хоча б одна -->
+          <!-- Соціальні мережі -->
           <ul v-if="hasSocialMedia" class="user_data-social">
             <li v-if="userData?.socialMedia?.whatsapp">
               <a :href="userData.socialMedia.whatsapp" target="_blank">
@@ -52,7 +52,7 @@
           </ul>
         </div>
 
-        <!-- Контакт - показуємо тільки якщо є телефон або email -->
+        <!-- Контакт -->
         <div v-if="hasContactInfo" class="user_section">
           <span class="user_section-title">{{ $t('sections.contact') }}</span>
           <ul class="user_list">
@@ -104,8 +104,8 @@
           <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
           <div class="user_history">
             <div v-for="(period, index) in userData.rentalHistory"
-            :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
-            :key="index">
+                 :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
+                 :key="index">
               <span class="user_history-title">{{ getTranslatedPeriod(period) }}</span>
               <ul class="user_list">
                 <li v-if="period?.address" class="user_info">
@@ -132,7 +132,7 @@
           </div>
         </div>
 
-        <!-- Якщо немає історії оренди, показуємо заглушку -->
+        <!-- Заглушка для історії оренди -->
         <div v-else class="user_section">
           <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
           <div class="user_history">
@@ -140,7 +140,7 @@
           </div>
         </div>
 
-  <!-- Додаткова інформація - показуємо тільки якщо є хоча б одне поле -->
+        <!-- Додаткова інформація -->
         <div v-if="hasAdditionalInfo" class="user_section">
           <span class="user_section-title">{{ $t('sections.additionalInfo') }}</span>
           <ul class="user_list">
@@ -151,7 +151,7 @@
               </div>
             </li>
             <li v-if="userData?.additionalInfo?.hasPets !== null
-            && userData?.additionalInfo?.hasPets !== undefined" class="user_info">
+                    && userData?.additionalInfo?.hasPets !== undefined" class="user_info">
               <img src="../img/icons/pets.svg" alt="pets">
               <div class="user_info-data">
                 <p>{{ getTranslatedPetsText() }}</p>
@@ -160,11 +160,11 @@
             <li v-if="userData?.additionalInfo?.flatmates" class="user_info">
               <img src="../img/icons/flatmates.svg" alt="flatmates">
               <div class="user_info-data">
-                <p>{{ getTranslatedFlmatmatesText() }}</p>
+                <p>{{ getTranslatedFlatmatesText() }}</p>
               </div>
             </li>
             <li v-if="userData?.additionalInfo?.smoking !== null
-            && userData?.additionalInfo?.smoking !== undefined" class="user_info">
+                    && userData?.additionalInfo?.smoking !== undefined" class="user_info">
               <img src="../img/icons/smoke.svg" alt="smoke">
               <div class="user_info-data">
                 <p>{{ getTranslatedSmokingText() }}</p>
@@ -197,31 +197,10 @@
 
 <script>
 import { useI18n } from 'vue-i18n';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import {
-  getTranslatedCitizenship,
-  getTranslatedTimeInPoland,
-  generateTranslatedLanguagesText,
-  generateTranslatedPetsText,
-  generateTranslatedMoveInDate,
-  getTranslatedFlatmates,
-  getTranslatedSmoking,
-  getTranslatedBudget,
-  getTranslatedRentalDuration,
-  getTranslatedSalaryRange,
-  getTranslatedIncomeDocument,
-  getTranslatedWorkDuration,
-  generateTranslatedRentalPeriod,
-  generateTranslatedLandlordContact,
-  getTranslatedCity,
-  getTranslatedRentalConfirmation,
-  getTranslatedRentalHistoryFallback,
-  getUserByProfileId,
-  FLATMATE_OPTIONS,
-  BUDGET_RANGES,
-  RENTAL_DURATION,
-} from '@/services/userService';
+import { getUserByProfileId } from '@/services/userService';
+import useUserDisplay from '@/composables/useUserDisplay';
 import Header from '../components/Header.vue';
 import Gradient from '../components/Gradient.vue';
 
@@ -240,125 +219,30 @@ export default {
     const loading = ref(true);
     const error = ref(null);
 
-    const translatedDescription = computed(() => {
-      if (!userData.value) return '';
-
-      const citizenshipText = getTranslatedCitizenship(userData.value.citizenshipStatus, t);
-      const timeText = getTranslatedTimeInPoland(userData.value.timeInPoland, t);
-
-      return `${citizenshipText}, ${timeText}`;
-    });
-
-    const getTranslatedLanguagesText = () => {
-      if (!userData.value?.additionalInfo?.languages) return '';
-      return generateTranslatedLanguagesText(userData.value.additionalInfo.languages, t);
-    };
-
-    const getTranslatedPetsText = () => {
-      if (!userData.value?.additionalInfo) return '';
-      return generateTranslatedPetsText(
-        userData.value.additionalInfo.hasPets,
-        userData.value.additionalInfo.petTypes,
-        t,
-      );
-    };
-
-    const getTranslatedFlmatmatesText = () => {
-      if (!userData.value?.additionalInfo?.flatmates) return '';
-      return getTranslatedFlatmates(userData.value.additionalInfo.flatmates, t);
-    };
-
-    const getTranslatedSmokingText = () => {
-      if (userData.value?.additionalInfo?.smoking === null || userData.value?.additionalInfo?.smoking === undefined) return '';
-      return getTranslatedSmoking(userData.value.additionalInfo.smoking, t);
-    };
-
-    const getTranslatedBudgetText = () => {
-      if (!userData.value?.additionalInfo?.budget) return '';
-      return getTranslatedBudget(userData.value.additionalInfo.budget, t);
-    };
-
-    const getTranslatedRentalDurationText = () => {
-      if (!userData.value?.additionalInfo?.rentalDuration) return '';
-      return getTranslatedRentalDuration(userData.value.additionalInfo.rentalDuration, t);
-    };
-
-    const getTranslatedMoveInDateText = () => {
-      if (!userData.value?.additionalInfo?.moveInDate) return '';
-      return generateTranslatedMoveInDate(userData.value.additionalInfo.moveInDate, t);
-    };
-
-    const getTranslatedSalaryRangeText = () => {
-      if (!userData.value?.workplace?.salaryRange) return '';
-      return getTranslatedSalaryRange(userData.value.workplace.salaryRange, t);
-    };
-
-    const getTranslatedIncomeDocumentText = () => {
-      if (!userData.value?.workplace?.incomeDocument) return '';
-      return getTranslatedIncomeDocument(userData.value.workplace.incomeDocument, t);
-    };
-
-    const getTranslatedWorkDurationText = () => {
-      if (!userData.value?.workplace?.workDuration) return '';
-      return getTranslatedWorkDuration(userData.value.workplace.workDuration, t);
-    };
-
-    const getTranslatedPeriod = (period) => generateTranslatedRentalPeriod(
-      period.startMonth,
-      period.startYear,
-      period.endMonth,
-      period.endYear,
-      period.isCurrentlyRenting,
-      t,
-    );
-
-    const getTranslatedLocationText = (city) => getTranslatedCity(city, t);
-    // eslint-disable-next-line
-    const getTranslatedLandlordContactText = (contact) => generateTranslatedLandlordContact(contact, t);
-    // eslint-disable-next-line
-    const getTranslatedRentalConfirmationText = (confirmation) => getTranslatedRentalConfirmation(confirmation, t);
-
-    const getTranslatedRentalHistoryFallbackText = () => getTranslatedRentalHistoryFallback(t);
-
-    // Computed властивості для перевірки наявності даних
-    const hasSocialMedia = computed(() => {
-      if (!userData.value?.socialMedia) return false;
-      const social = userData.value.socialMedia;
-      return social.whatsapp || social.instagram || social.facebook || social.telegram;
-    });
-
-    const hasContactInfo = computed(() => {
-      if (!userData.value?.contact) return false;
-      return userData.value.contact.phone || userData.value.contact.email;
-    });
-
-    const hasWorkplaceInfo = computed(() => {
-      if (!userData.value?.workplace) return false;
-      const { workplace } = userData.value;
-      return workplace.workInfo || workplace.salaryRange || workplace.workDuration;
-    });
-
-    const hasAdditionalInfo = computed(() => {
-      if (!userData.value?.additionalInfo) return false;
-      const info = userData.value.additionalInfo;
-      return info.languagesText
-         || info.petsText
-         || info.flatmates
-         || (info.smoking !== null && info.smoking !== undefined)
-         || info.budget
-         || info.rentalDuration
-         || info.moveInDateText;
-    });
-
-    const hasRentalHistory = computed(() => userData.value?.rentalHistory
-         && Array.isArray(userData.value.rentalHistory)
-         && userData.value.rentalHistory.length > 0);
-
-    const getFlatmatesDisplayText = (flatmates) => FLATMATE_OPTIONS[flatmates]?.displayText || '';
-
-    const getBudgetDisplayText = (budget) => BUDGET_RANGES[budget]?.displayText || '';
-
-    const getRentalDurationDisplayText = (rentalDuration) => RENTAL_DURATION[rentalDuration]?.displayText || '';
+    // Використовуємо композабл для логіки відображення
+    const {
+      hasSocialMedia,
+      hasContactInfo,
+      hasWorkplaceInfo,
+      hasAdditionalInfo,
+      hasRentalHistory,
+      getTranslatedDescription,
+      getTranslatedLanguagesText,
+      getTranslatedPetsText,
+      getTranslatedFlatmatesText,
+      getTranslatedSmokingText,
+      getTranslatedBudgetText,
+      getTranslatedRentalDurationText,
+      getTranslatedMoveInDateText,
+      getTranslatedSalaryRangeText,
+      getTranslatedIncomeDocumentText,
+      getTranslatedWorkDurationText,
+      getTranslatedPeriod,
+      getTranslatedLocationText,
+      getTranslatedLandlordContactText,
+      getTranslatedRentalConfirmationText,
+      getTranslatedRentalHistoryFallbackText,
+    } = useUserDisplay(userData, t);
 
     // Функція завантаження користувача
     const loadUser = async () => {
@@ -373,12 +257,10 @@ export default {
           return;
         }
 
-        console.log('Завантаження користувача:', profileId);
         const user = await getUserByProfileId(profileId);
 
         if (user) {
           userData.value = user;
-          console.log('Користувач завантажений:', user);
         } else {
           error.value = 'Користувача не знайдено';
         }
@@ -390,29 +272,24 @@ export default {
       }
     };
 
-    // Викликаємо завантаження при монтуванні компонента
+    // Завантажуємо дані при монтуванні компонента
     onMounted(() => {
       loadUser();
     });
 
-    // Повертаємо все, що потрібно в template
     return {
       userData,
       loading,
       error,
-      loadUser,
       hasSocialMedia,
       hasContactInfo,
       hasWorkplaceInfo,
       hasAdditionalInfo,
       hasRentalHistory,
-      getFlatmatesDisplayText,
-      getBudgetDisplayText,
-      getRentalDurationDisplayText,
-      translatedDescription,
+      getTranslatedDescription,
       getTranslatedLanguagesText,
       getTranslatedPetsText,
-      getTranslatedFlmatmatesText,
+      getTranslatedFlatmatesText,
       getTranslatedSmokingText,
       getTranslatedBudgetText,
       getTranslatedRentalDurationText,
@@ -436,6 +313,7 @@ export default {
   height: 100%;
   background-color: $bg-grey !important;
 }
+
 .loading, .error {
   padding: 2rem;
   text-align: center;
