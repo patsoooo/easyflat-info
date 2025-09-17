@@ -104,10 +104,12 @@ export default {
 </script>
 <style lang="scss" scoped>
 .nav-top {
+  background-color: $bg-white;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
+  z-index: 1;
 }
 .nav {
   width: 100%;
