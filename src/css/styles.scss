@@ -144,8 +144,8 @@ a:hover {
 
 .section {
   width: 100%;
-  padding-bottom: 4.4rem;
-  margin-bottom: 4.4rem;
+  padding-bottom: 4.8rem;
+  margin-bottom: 4.8rem;
   border-bottom: .12rem solid $border-grey;
   &_heading {
     margin-bottom: 2.4rem;
@@ -157,6 +157,12 @@ a:hover {
         p {
           color: $text-blue;
         }
+        .success-message {
+          color: #27ae60;
+        }
+        .error-message {
+          color: #e74c3c;
+        }
       }
     }
     h4 {
@@ -167,6 +173,11 @@ a:hover {
       @include text-13-regular;
       color: $text-grey-6;
     }
+  }
+  &_content {
+    display: flex;
+    flex-direction: column;
+    gap: 3.2rem;
   }
 }
 
@@ -185,6 +196,11 @@ a:hover {
 .col-preview {
   flex: 0 0 auto;
   width: 40rem;
+  position: sticky;
+  top: 12rem;
+  height: fit-content;
+  max-height: calc(100vh - 14rem);
+  // overflow-y: auto;
 }
 
 .user {
