@@ -23,6 +23,49 @@ export const CITIZENSHIP_STATUS = {
   },
 };
 
+// Константи для документів перебування в країні
+export const RESIDENCE_DOCUMENTS = {
+  polish_passport: {
+    value: 'polish_passport',
+    label: 'Польський паспорт',
+    displayText: 'Польський паспорт',
+  },
+  pesel_ukr: {
+    value: 'pesel_ukr',
+    label: 'Pesel UKR',
+    displayText: 'Pesel UKR',
+  },
+  residence_card: {
+    value: 'residence_card',
+    label: 'Карта побиту',
+    displayText: 'Карта побиту',
+  },
+  permanent_residence_card: {
+    value: 'permanent_residence_card',
+    label: 'Карта сталого побиту',
+    displayText: 'Карта сталого побиту',
+  },
+  eu_resident_card: {
+    value: 'eu_resident_card',
+    label: 'Карта резидента ЄС',
+    displayText: 'Карта резидента ЄС',
+  },
+};
+
+// Константи для статі
+export const GENDER = {
+  male: {
+    value: 'male',
+    label: 'Pan',
+    displayText: 'Pan',
+  },
+  female: {
+    value: 'female',
+    label: 'Pani',
+    displayText: 'Pani',
+  },
+};
+
 export const TIME_IN_POLAND = {
   less_than_1: {
     value: 'less_than_1',
@@ -779,6 +822,8 @@ export const createUser = async (userData) => {
       initials: generateInitials(firstName, lastName),
       citizenshipStatus,
       timeInPoland,
+      gender: userData.gender || 'male',
+      residenceDocument: userData.residenceDocument || 'residence_card',
       description: generateDescription(citizenshipStatus, timeInPoland),
       visible: true, // профіль видимий за замовчуванням
       profileCompleted: true,
@@ -1106,6 +1151,8 @@ export const createUserWithAccessCode = async () => {
       initials: '',
       citizenshipStatus: 'foreigner',
       timeInPoland: 'less_than_1',
+      gender: 'male',
+      residenceDocument: 'residence_card',
       description: '',
 
       // Код доступу та статуси
