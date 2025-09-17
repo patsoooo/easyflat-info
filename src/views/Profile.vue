@@ -11,6 +11,8 @@
             @update:lastName="userData.lastName = $event"
           />
           <StatusInPoland />
+          <ContactInfo />
+          <FinancialInformation />
         </div>
       </div>
       <div class="col-preview">
@@ -25,7 +27,9 @@ import { reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getUserByProfileId } from '@/services/userService';
 import PersonalInfo from '@/components/profile/PersonalInfo.vue';
+import FinancialInformation from '@/components/profile/FinancialInformation.vue';
 import StatusInPoland from '@/components/profile/StatusInPoland.vue';
+import ContactInfo from '@/components/profile/ContactInfo.vue';
 import Navigation from '@/components/profile/Navigation.vue';
 import Preview from '@/components/profile/Preview.vue';
 
@@ -36,6 +40,8 @@ export default {
     Navigation,
     Preview,
     StatusInPoland,
+    FinancialInformation,
+    ContactInfo,
   },
   setup() {
     const router = useRouter();
