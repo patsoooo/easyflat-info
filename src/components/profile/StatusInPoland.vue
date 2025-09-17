@@ -5,66 +5,70 @@
         <h4>Інформація про побут</h4>
         <div class="section_heading-top-mes">
           <!-- Success message -->
-          <p v-if="successMessage">
+          <p v-if="successMessage" class="success-message">
             {{ successMessage }}
           </p>
           <!-- Error message -->
-          <p v-if="errorMessage">
+          <p v-if="errorMessage" class="error-message">
             {{ errorMessage }}
           </p>
         </div>
       </div>
       <p>Ваш статус громадянства та час перебування в Польщі</p>
     </div>
-    <FormGroup>
-      <FormSelect
-        v-model="localCitizenshipStatus"
-        :options="citizenshipOptions"
-        placeholder="Статус громадянства"
-        @update:modelValue="handleCitizenshipChange"
-      />
-    </FormGroup>
+    <div class="section_content">
+      <FormGroup>
+        <FormSelect
+          v-model="localCitizenshipStatus"
+          :options="citizenshipOptions"
+          placeholder="Оберіть статус громадянства"
+          @update:modelValue="handleCitizenshipChange"
+        />
+        <FormSelect
+          v-model="localResidenceDocument"
+          :options="residenceDocumentOptions"
+          placeholder="Документ"
+          @update:modelValue="handleResidenceDocumentChange"
+        />
+      </FormGroup>
 
-    <!-- Time in Poland Radio Buttons -->
-    <!-- <div class="time-in-poland">
-      <h5 class="time-in-poland__title">Час перебування в Польщі</h5>
-      <div class="time-in-poland__options">
-        <label
-          v-for="option in timeInPolandOptions"
-          :key="option.value"
-          class="radio-option"
-        >
-          <input
-            type="radio"
-            :value="option.value"
-            v-model="localTimeInPoland"
-            @change="handleTimeInPolandChange"
-            class="radio-option__input"
-          />
-          <span class="radio-option__label">{{ option.label }}</span>
-        </label>
-      </div>
-    </div> -->
+      <FormRadioGroup title="Термін перебування в Польщі">
+        <FormRadio
+          v-model="localTimeInPoland"
+          :options="timeInPolandOptions"
+          @update:modelValue="handleTimeInPolandChange"
+        />
+      </FormRadioGroup>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue';
 import {
-  updateUser, getUserByProfileId, CITIZENSHIP_STATUS, TIME_IN_POLAND,
+  updateUser,
+  getUserByProfileId,
+  CITIZENSHIP_STATUS,
+  TIME_IN_POLAND,
+  RESIDENCE_DOCUMENTS,
 } from '@/services/userService';
 import FormSelect from '@/components/form/FormSelect.vue';
+import FormRadioGroup from '@/components/form/FormRadioGroup.vue';
 import FormGroup from '@/components/form/FormGroup.vue';
+import FormRadio from '@/components/form/FormRadio.vue';
 
 export default {
   name: 'StatusInPoland',
   components: {
     FormSelect,
+    FormRadioGroup,
     FormGroup,
+    FormRadio,
   },
   setup() {
     const localCitizenshipStatus = ref('');
     const localTimeInPoland = ref('');
+    const localResidenceDocument = ref('');
     const successMessage = ref('');
     const errorMessage = ref('');
 
@@ -80,6 +84,12 @@ export default {
       value: TIME_IN_POLAND[key].value,
     }));
 
+    // Опції для документів
+    const residenceDocumentOptions = Object.keys(RESIDENCE_DOCUMENTS).map((key) => ({
+      label: RESIDENCE_DOCUMENTS[key].label,
+      value: RESIDENCE_DOCUMENTS[key].value,
+    }));
+
     // Завантаження поточних даних користувача
     const loadUserData = async () => {
       try {
@@ -90,18 +100,30 @@ export default {
         if (user) {
           localCitizenshipStatus.value = user.citizenshipStatus || 'foreigner';
           localTimeInPoland.value = user.timeInPoland || 'less_than_1';
+          localResidenceDocument.value = user.residenceDocument || 'residence_card';
         }
       } catch (error) {
         console.error('Помилка завантаження даних:', error);
+        errorMessage.value = 'Помилка завантаження даних';
       }
     };
 
     // Показ повідомлення про успіх
     const showSuccessMessage = () => {
       successMessage.value = 'Збережено';
+      errorMessage.value = '';
       setTimeout(() => {
         successMessage.value = '';
       }, 2000);
+    };
+
+    // Показ повідомлення про помилку
+    const showErrorMessage = (message) => {
+      errorMessage.value = message;
+      successMessage.value = '';
+      setTimeout(() => {
+        errorMessage.value = '';
+      }, 3000);
     };
 
     // Обробка зміни статусу громадянства
@@ -109,30 +131,61 @@ export default {
       localCitizenshipStatus.value = value;
 
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      if (!currentUser.profileId) return;
+      if (!currentUser.profileId) {
+        showErrorMessage('Помилка: користувач не знайдений');
+        return;
+      }
 
       try {
         await updateUser(currentUser.profileId, { citizenshipStatus: value });
         showSuccessMessage();
-        errorMessage.value = '';
       } catch (error) {
         console.error('Помилка оновлення статусу громадянства:', error);
-        errorMessage.value = 'Помилка при збереженні статусу громадянства';
+        showErrorMessage('Помилка при збереженні статусу громадянства');
+        // Відновлення попереднього значення при помилці
+        loadUserData();
       }
     };
 
     // Обробка зміни часу в Польщі
-    const handleTimeInPolandChange = async () => {
+    const handleTimeInPolandChange = async (value) => {
+      localTimeInPoland.value = value;
+
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      if (!currentUser.profileId) return;
+      if (!currentUser.profileId) {
+        showErrorMessage('Помилка: користувач не знайдений');
+        return;
+      }
 
       try {
-        await updateUser(currentUser.profileId, { timeInPoland: localTimeInPoland.value });
+        await updateUser(currentUser.profileId, { timeInPoland: value });
         showSuccessMessage();
-        errorMessage.value = '';
       } catch (error) {
         console.error('Помилка оновлення часу в Польщі:', error);
-        errorMessage.value = 'Помилка при збереженні часу в Польщі';
+        showErrorMessage('Помилка при збереженні часу в Польщі');
+        // Відновлення попереднього значення при помилці
+        loadUserData();
+      }
+    };
+
+    // Обробка зміни документа перебування
+    const handleResidenceDocumentChange = async (value) => {
+      localResidenceDocument.value = value;
+
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (!currentUser.profileId) {
+        showErrorMessage('Помилка: користувач не знайдений');
+        return;
+      }
+
+      try {
+        await updateUser(currentUser.profileId, { residenceDocument: value });
+        showSuccessMessage();
+      } catch (error) {
+        console.error('Помилка оновлення документа перебування:', error);
+        showErrorMessage('Помилка при збереженні документа перебування');
+        // Відновлення попереднього значення при помилці
+        loadUserData();
       }
     };
 
@@ -144,13 +197,19 @@ export default {
     return {
       localCitizenshipStatus,
       localTimeInPoland,
+      localResidenceDocument,
       citizenshipOptions,
       timeInPolandOptions,
+      residenceDocumentOptions,
       successMessage,
       errorMessage,
       handleCitizenshipChange,
       handleTimeInPolandChange,
+      handleResidenceDocumentChange,
     };
   },
 };
 </script>
+
+<style lang="scss" scoped>
+</style>

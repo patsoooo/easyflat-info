@@ -1,201 +1,292 @@
 <template>
-  <div class="user_section">
-    <span class="user_section-title">{{ $t('create.contact.title') }}</span>
-
-    <!-- Email -->
-    <div class="form-group">
-      <label for="email" class="form-label">
-        {{ $t('create.contact.email') }}
-      <input
-        id="email"
-        v-model="localEmail"
-        type="email"
-        class="form-input"
-        :class="{ 'error': errors.email }"
-        :placeholder="$t('create.contact.emailPlaceholder')"
-      />
-      </label>
-      <div v-if="errors.email" class="form-error">
-        {{ errors.email }}
+  <div class="section">
+    <div class="section_heading">
+      <div class="section_heading-top">
+        <h4>Контакт з вами</h4>
+        <div class="section_heading-top-mes">
+          <!-- Success message -->
+          <p v-if="successMessage" class="success-message">
+            {{ successMessage }}
+          </p>
+          <!-- Error message -->
+          <p v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </p>
+        </div>
       </div>
+      <p>Як з вами можна зв'язатися</p>
     </div>
+    <div class="section_content">
+      <FormGroup>
+        <FormInput
+          v-model="localPhone"
+          placeholder="Ваш номер телефону"
+          @update:modelValue="handlePhoneChange"
+        />
+        <FormInput
+          v-model="localEmail"
+          placeholder="Ваш емейл"
+          type="email"
+          @update:modelValue="handleEmailChange"
+        />
+      </FormGroup>
 
-    <!-- Phone -->
-    <div class="form-group">
-      <label for="phone" class="form-label">
-        {{ $t('create.contact.phone') }}
-      <input
-        id="phone"
-        v-model="localPhone"
-        type="tel"
-        class="form-input"
-        :class="{ 'error': errors.phone }"
-        :placeholder="$t('create.contact.phonePlaceholder')"
-      />
-      </label>
-      <div v-if="errors.phone" class="form-error">
-        {{ errors.phone }}
-      </div>
-    </div>
-
-    <!-- Social Media Section -->
-    <div class="form-group">
-      <div class="form-label">
-        {{ $t('create.contact.socialMedia') }}
-      </div>
-      <div class="form-note">
-        <p>{{ $t('create.contact.socialMediaNote') }}</p>
-      </div>
-    </div>
-
-    <!-- WhatsApp -->
-    <div class="form-group social-group">
-      <label for="whatsapp" class="form-label form-label--small">
-        <img src="../../img/social/whatsapp.svg" alt="WhatsApp" class="social-icon">
-        {{ $t('create.contact.whatsapp') }}
-      <input
-        id="whatsapp"
-        v-model="localWhatsapp"
-        type="url"
-        class="form-input"
-        :placeholder="$t('create.contact.whatsappPlaceholder')"
-      />
-      </label>
-    </div>
-
-    <!-- Instagram -->
-    <div class="form-group social-group">
-      <label for="instagram" class="form-label form-label--small">
-        <img src="../../img/social/instagram.svg" alt="Instagram" class="social-icon">
-        {{ $t('create.contact.instagram') }}
-      <input
-        id="instagram"
-        v-model="localInstagram"
-        type="url"
-        class="form-input"
-        :placeholder="$t('create.contact.instagramPlaceholder')"
-      />
-      </label>
-    </div>
-
-    <!-- Facebook -->
-    <div class="form-group social-group">
-      <label for="facebook" class="form-label form-label--small">
-        <img src="../../img/social/fb.svg" alt="Facebook" class="social-icon">
-        {{ $t('create.contact.facebook') }}
-      <input
-        id="facebook"
-        v-model="localFacebook"
-        type="url"
-        class="form-input"
-        :placeholder="$t('create.contact.facebookPlaceholder')"
-      />
-      </label>
-    </div>
-
-    <!-- Telegram -->
-    <div class="form-group social-group">
-      <label for="telegram" class="form-label form-label--small">
-        <img src="../../img/social/linkedin.svg" alt="Telegram" class="social-icon">
-        {{ $t('create.contact.telegram') }}
-      <input
-        id="telegram"
-        v-model="localTelegram"
-        type="url"
-        class="form-input"
-        :placeholder="$t('create.contact.telegramPlaceholder')"
-      />
-      </label>
-    </div>
-
-    <div class="form-note">
-      <p>{{ $t('create.contact.note') }}</p>
+      <FormGroup title="Соціальні мережі">
+        <FormInput
+          v-model="localFacebook"
+          placeholder="Посилання на Facebook"
+          @update:modelValue="handleFacebookChange"
+        />
+        <FormInput
+          v-model="localInstagram"
+          placeholder="Посилання на Instagram"
+          @update:modelValue="handleInstagramChange"
+        />
+        <FormInput
+          v-model="localTelegram"
+          placeholder="Посилання на Telegram"
+          @update:modelValue="handleTelegramChange"
+        />
+        <FormInput
+          v-model="localWhatsapp"
+          placeholder="Номер Whatsapp"
+          @update:modelValue="handleWhatsappChange"
+        />
+      </FormGroup>
     </div>
   </div>
 </template>
 
 <script>
-import { computed } from 'vue';
+import { ref, onMounted } from 'vue';
+import { updateUser, getUserByProfileId } from '@/services/userService';
+import FormGroup from '@/components/form/FormGroup.vue';
+import FormInput from '@/components/form/FormInput.vue';
 
 export default {
   name: 'ContactInfo',
-  props: {
-    email: {
-      type: String,
-      default: '',
-    },
-    phone: {
-      type: String,
-      default: '',
-    },
-    whatsapp: {
-      type: String,
-      default: '',
-    },
-    instagram: {
-      type: String,
-      default: '',
-    },
-    facebook: {
-      type: String,
-      default: '',
-    },
-    telegram: {
-      type: String,
-      default: '',
-    },
-    errors: {
-      type: Object,
-      default: () => ({}),
-    },
+  components: {
+    FormInput,
+    FormGroup,
   },
-  emits: [
-    'update:email',
-    'update:phone',
-    'update:whatsapp',
-    'update:instagram',
-    'update:facebook',
-    'update:telegram',
-  ],
-  setup(props, { emit }) {
-    const localEmail = computed({
-      get: () => props.email,
-      set: (value) => emit('update:email', value),
-    });
+  setup() {
+    // Локальні стани для контактів
+    const localPhone = ref('');
+    const localEmail = ref('');
 
-    const localPhone = computed({
-      get: () => props.phone,
-      set: (value) => emit('update:phone', value),
-    });
+    // Локальні стани для соціальних мереж
+    const localFacebook = ref('');
+    const localInstagram = ref('');
+    const localTelegram = ref('');
+    const localWhatsapp = ref('');
 
-    const localWhatsapp = computed({
-      get: () => props.whatsapp,
-      set: (value) => emit('update:whatsapp', value),
-    });
+    const successMessage = ref('');
+    const errorMessage = ref('');
 
-    const localInstagram = computed({
-      get: () => props.instagram,
-      set: (value) => emit('update:instagram', value),
-    });
+    // Завантаження поточних даних користувача
+    const loadUserData = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        if (!currentUser.profileId) return;
 
-    const localFacebook = computed({
-      get: () => props.facebook,
-      set: (value) => emit('update:facebook', value),
-    });
+        const user = await getUserByProfileId(currentUser.profileId);
+        if (user) {
+          // Контактні дані
+          localPhone.value = user.contact?.phone || '';
+          localEmail.value = user.contact?.email || '';
 
-    const localTelegram = computed({
-      get: () => props.telegram,
-      set: (value) => emit('update:telegram', value),
+          // Соціальні мережі
+          localFacebook.value = user.socialMedia?.facebook || '';
+          localInstagram.value = user.socialMedia?.instagram || '';
+          localTelegram.value = user.socialMedia?.telegram || '';
+          localWhatsapp.value = user.socialMedia?.whatsapp || '';
+        }
+      } catch (error) {
+        console.error('Помилка завантаження даних:', error);
+        errorMessage.value = 'Помилка завантаження даних';
+      }
+    };
+
+    // Показ повідомлення про успіх
+    const showSuccessMessage = () => {
+      successMessage.value = 'Збережено';
+      errorMessage.value = '';
+      setTimeout(() => {
+        successMessage.value = '';
+      }, 2000);
+    };
+
+    // Показ повідомлення про помилку
+    const showErrorMessage = (message) => {
+      errorMessage.value = message;
+      successMessage.value = '';
+      setTimeout(() => {
+        errorMessage.value = '';
+      }, 3000);
+    };
+
+    // Валідація email
+    const isValidEmail = (email) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    };
+
+    // Валідація телефону
+    const isValidPhone = (phone) => {
+      const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+      return phoneRegex.test(phone.replace(/[\s\-()]/g, ''));
+    };
+
+    // Отримання поточних контактних даних
+    const getCurrentContact = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const user = await getUserByProfileId(currentUser.profileId);
+        return user?.contact || { phone: null, email: null };
+      } catch (error) {
+        return { phone: null, email: null };
+      }
+    };
+
+    // Отримання поточних даних соціальних мереж
+    const getCurrentSocialMedia = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const user = await getUserByProfileId(currentUser.profileId);
+        return user?.socialMedia || {
+          facebook: null,
+          instagram: null,
+          telegram: null,
+          whatsapp: null,
+        };
+      } catch (error) {
+        return {
+          facebook: null, instagram: null, telegram: null, whatsapp: null,
+        };
+      }
+    };
+
+    // Функція оновлення контакту
+    const updateContact = async (field, value) => {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (!currentUser.profileId) {
+        showErrorMessage('Помилка: користувач не знайдений');
+        return;
+      }
+
+      try {
+        await updateUser(currentUser.profileId, {
+          contact: {
+            ...await getCurrentContact(),
+            [field]: value || null,
+          },
+        });
+        showSuccessMessage();
+      } catch (error) {
+        console.error(`Помилка оновлення ${field}:`, error);
+        showErrorMessage(`Помилка при збереженні ${field}`);
+        loadUserData(); // Відновлення попереднього значення
+      }
+    };
+
+    // Функція оновлення соціальних мереж
+    const updateSocialMedia = async (field, value) => {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (!currentUser.profileId) {
+        showErrorMessage('Помилка: користувач не знайдений');
+        return;
+      }
+
+      try {
+        await updateUser(currentUser.profileId, {
+          socialMedia: {
+            ...await getCurrentSocialMedia(),
+            [field]: value || null,
+          },
+        });
+        showSuccessMessage();
+      } catch (error) {
+        console.error(`Помилка оновлення ${field}:`, error);
+        showErrorMessage(`Помилка при збереженні ${field}`);
+        loadUserData(); // Відновлення попереднього значення
+      }
+    };
+
+    // Обробники змін контактних даних
+    const handlePhoneChange = async (value) => {
+      localPhone.value = value;
+
+      if (value && !isValidPhone(value)) {
+        showErrorMessage('Невірний формат номера телефону');
+        return;
+      }
+
+      await updateContact('phone', value);
+    };
+
+    const handleEmailChange = async (value) => {
+      localEmail.value = value;
+
+      if (value && !isValidEmail(value)) {
+        showErrorMessage('Невірний формат email');
+        return;
+      }
+
+      await updateContact('email', value);
+    };
+
+    // Обробники змін соціальних мереж
+    const handleFacebookChange = async (value) => {
+      localFacebook.value = value;
+      await updateSocialMedia('facebook', value);
+    };
+
+    const handleInstagramChange = async (value) => {
+      localInstagram.value = value;
+      await updateSocialMedia('instagram', value);
+    };
+
+    const handleTelegramChange = async (value) => {
+      localTelegram.value = value;
+      await updateSocialMedia('telegram', value);
+    };
+
+    const handleWhatsappChange = async (value) => {
+      localWhatsapp.value = value;
+      await updateSocialMedia('whatsapp', value);
+    };
+
+    // Завантажуємо дані при монтуванні
+    onMounted(() => {
+      loadUserData();
     });
 
     return {
-      localEmail,
+      // Контактні дані
       localPhone,
-      localWhatsapp,
-      localInstagram,
+      localEmail,
+
+      // Соціальні мережі
       localFacebook,
+      localInstagram,
       localTelegram,
+      localWhatsapp,
+
+      // Повідомлення
+      successMessage,
+      errorMessage,
+
+      // Обробники
+      handlePhoneChange,
+      handleEmailChange,
+      handleFacebookChange,
+      handleInstagramChange,
+      handleTelegramChange,
+      handleWhatsappChange,
     };
   },
 };
 </script>
+
+<style lang="scss" scoped>
+</style>
