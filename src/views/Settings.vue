@@ -46,6 +46,7 @@ export default {
         await signOutUser(); // Замість простого очищення localStorage
         router.push('/login');
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка при виході:', error);
       } finally {
         isLoading.value = false;

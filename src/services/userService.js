@@ -407,6 +407,7 @@ export const checkProfileIdExists = async (profileId) => {
     const docSnap = await getDoc(docRef);
     return docSnap.exists();
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при перевірці ID:', error);
     return false;
   }
@@ -799,6 +800,7 @@ export const getUserByProfileId = async (profileId) => {
     }
     return null;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при отриманні користувача:', error);
     throw error;
   }
@@ -914,6 +916,7 @@ export const createUser = async (userData) => {
 
     return { profileId, ...userDataWithDefaults };
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при створенні користувача:', error);
     throw error;
   }
@@ -1039,6 +1042,7 @@ export const updateUser = async (profileId, updates) => {
     await updateDoc(docRef, processedUpdates);
     return true;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при оновленні користувача:', error);
     throw error;
   }
@@ -1051,6 +1055,7 @@ export const deleteUser = async (profileId) => {
     await deleteDoc(docRef);
     return true;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при видаленні користувача:', error);
     throw error;
   }
@@ -1101,6 +1106,7 @@ export const checkAccessCodeExists = async (accessCode) => {
     const querySnapshot = await getDocs(q);
     return !querySnapshot.empty;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при перевірці коду доступу:', error);
     return false;
   }
@@ -1133,6 +1139,7 @@ export const getUserByAccessCode = async (accessCode) => {
     }
     return null;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при отриманні користувача за кодом:', error);
     throw error;
   }
@@ -1205,6 +1212,7 @@ export const createUserWithAccessCode = async () => {
 
     return { profileId, accessCode, ...userDataWithDefaults };
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при створенні користувача з кодом:', error);
     throw error;
   }
@@ -1231,6 +1239,7 @@ export const updateUserBasicInfo = async (profileId, firstName, lastName) => {
 
     return true;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при оновленні базової інформації:', error);
     throw error;
   }
@@ -1249,6 +1258,7 @@ export const getUserByGoogleId = async (googleId) => {
     }
     return null;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при отриманні користувача за Google ID:', error);
     throw error;
   }
@@ -1322,6 +1332,7 @@ export const createUserWithGoogleAuth = async (googleData) => {
 
     return { profileId, ...userData };
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка при створенні користувача з Google:', error);
     throw error;
   }

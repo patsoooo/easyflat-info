@@ -176,6 +176,7 @@ export default {
         });
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error(`Помилка оновлення ${field}:`, error);
         showErrorMessage(`Помилка при збереженні ${field}`);
       }
@@ -198,6 +199,7 @@ export default {
         });
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error(`Помилка оновлення ${field}:`, error);
         showErrorMessage(`Помилка при збереженні ${field}`);
       }

@@ -114,6 +114,7 @@ export default {
 
         handleUserLogin(user);
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка Google авторизації:', error);
         showError(error.message || 'Помилка при авторизації через Google');
       } finally {
@@ -133,6 +134,7 @@ export default {
           return;
         }
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка обробки redirect:', error);
         showError('Помилка при авторизації. Спробуйте ще раз.');
       } finally {
@@ -168,6 +170,7 @@ export default {
           showError('Код доступу не знайдено');
         }
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка входу за кодом:', error);
         showError('Помилка при вході за кодом');
       } finally {

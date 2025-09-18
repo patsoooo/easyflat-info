@@ -265,6 +265,7 @@ export default {
           error.value = 'Користувача не знайдено';
         }
       } catch (err) {
+        // eslint-disable-next-line
         console.error('Помилка завантаження користувача:', err);
         error.value = 'Помилка завантаження даних';
       } finally {

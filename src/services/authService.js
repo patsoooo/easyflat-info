@@ -26,26 +26,33 @@ const shouldUseRedirect = () => /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Op
 
 export const signInWithGoogle = async () => {
   try {
+    // eslint-disable-next-line
     console.log('Початок Google авторизації...');
     let result;
     let user;
 
     if (shouldUseRedirect()) {
+      // eslint-disable-next-line
       console.log('Використовуємо redirect авторизацію');
       await signInWithRedirect(auth, googleProvider);
       return null;
     }
+    // eslint-disable-next-line
     console.log('Використовуємо popup авторизацію');
     try {
       result = await signInWithPopup(auth, googleProvider);
       user = result.user;
+      // eslint-disable-next-line
       console.log('Popup авторизація успішна:', user.uid);
     } catch (popupError) {
+      // eslint-disable-next-line
       console.warn('Popup заблокований, код помилки:', popupError.code);
+      // eslint-disable-next-line
       console.warn('Повідомлення помилки:', popupError.message);
 
       if (popupError.code === 'auth/popup-blocked'
             || popupError.code === 'auth/popup-closed-by-user') {
+        // eslint-disable-next-line
         console.log('Переходимо на redirect авторизацію');
         await signInWithRedirect(auth, googleProvider);
         return null;
@@ -56,12 +63,13 @@ export const signInWithGoogle = async () => {
     if (!user) {
       throw new Error('Не вдалося отримати дані користувача');
     }
-
+    // eslint-disable-next-line
     console.log('Перевіряємо користувача в базі даних:', user.uid);
     // Перевіряємо чи існує користувач у нашій базі
     let dbUser = await getUserByGoogleId(user.uid);
 
     if (!dbUser) {
+      // eslint-disable-next-line
       console.log('Створюємо нового користувача');
       // Створюємо нового користувача
       dbUser = await createUserWithGoogleAuth({
@@ -72,14 +80,18 @@ export const signInWithGoogle = async () => {
         photoURL: user.photoURL,
       });
     } else {
+      // eslint-disable-next-line
       console.log('Користувач знайдений в базі даних');
     }
-
+    // eslint-disable-next-line
     console.log('Авторизація завершена успішно');
     return dbUser;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Детальна помилка авторизації:', error);
+    // eslint-disable-next-line
     console.error('Код помилки:', error.code);
+    // eslint-disable-next-line
     console.error('Повідомлення:', error.message);
 
     // Обробляємо різні типи помилок
@@ -126,6 +138,7 @@ export const handleRedirectResult = async () => {
 
     return dbUser;
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка обробки redirect результату:', error);
     throw error;
   }
@@ -136,6 +149,7 @@ export const signOutUser = async () => {
     await signOut(auth);
     localStorage.removeItem('currentUser');
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Помилка виходу:', error);
     throw error;
   }

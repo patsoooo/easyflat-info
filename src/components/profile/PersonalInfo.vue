@@ -89,6 +89,7 @@ export default {
           localGender.value = user.gender || 'male';
         }
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка завантаження даних:', error);
         errorMessage.value = 'Помилка завантаження даних';
       }
@@ -136,6 +137,7 @@ export default {
         await updateUser(currentUser.profileId, { firstName: value });
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка оновлення імені:', error);
         showErrorMessage('Помилка при збереженні імені');
       }
@@ -156,6 +158,7 @@ export default {
         await updateUser(currentUser.profileId, { lastName: value });
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка оновлення прізвища:', error);
         showErrorMessage('Помилка при збереженні прізвища');
       }
@@ -175,6 +178,7 @@ export default {
         await updateUser(currentUser.profileId, { gender: value });
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка оновлення статі:', error);
         showErrorMessage('Помилка при збереженні статі');
         // Відновлення попереднього значення при помилці

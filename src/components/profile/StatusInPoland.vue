@@ -146,6 +146,7 @@ export default {
         });
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка оновлення статусу громадянства:', error);
         showErrorMessage('Помилка при збереженні статусу громадянства');
       }
@@ -177,6 +178,7 @@ export default {
         });
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка оновлення часу в Польщі:', error);
         showErrorMessage('Помилка при збереженні часу в Польщі');
       }
@@ -202,6 +204,7 @@ export default {
         await updateUser(currentUser.profileId, { residenceDocument: value });
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка оновлення документа перебування:', error);
         showErrorMessage('Помилка при збереженні документа перебування');
       }

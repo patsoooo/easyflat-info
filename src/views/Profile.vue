@@ -128,7 +128,7 @@ export default {
       }
 
       target[keys[keys.length - 1]] = value;
-
+      // eslint-disable-next-line
       console.log(`Оновлено ${field}:`, value);
     }
 
@@ -187,13 +187,15 @@ export default {
               moveInDateText: null,
             },
           });
-
+          // eslint-disable-next-line
           console.log('Всі дані користувача завантажено:', user);
         } else {
+          // eslint-disable-next-line
           console.error('Користувача не знайдено');
           router.push('/login');
         }
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка завантаження даних:', error);
       }
     };

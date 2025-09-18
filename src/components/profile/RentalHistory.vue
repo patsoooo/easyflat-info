@@ -244,6 +244,7 @@ export default {
           }
         }
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка завантаження даних:', error);
         errorMessage.value = 'Помилка завантаження даних';
       }
@@ -300,6 +301,7 @@ export default {
         updatePreviewData();
         showSuccessMessage();
       } catch (error) {
+        // eslint-disable-next-line
         console.error('Помилка оновлення історії оренди:', error);
         showErrorMessage('Помилка при збереженні історії оренди');
         loadUserData(); // Restore previous value
