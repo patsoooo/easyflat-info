@@ -56,12 +56,12 @@ export const RESIDENCE_DOCUMENTS = {
 export const GENDER = {
   male: {
     value: 'male',
-    label: 'Pan',
+    label: 'Чоловік',
     displayText: 'Pan',
   },
   female: {
     value: 'female',
-    label: 'Pani',
+    label: 'Жінка',
     displayText: 'Pani',
   },
 };

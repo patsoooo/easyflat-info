@@ -42,8 +42,8 @@ export default {
 
     // Якщо елемент один в рядку, він має максимальну ширину 36.4rem
     > *:only-child {
-      min-width: auto;
-      max-width: 36.4rem;
+      // min-width: auto;
+      max-width: calc(50% - 1.6rem);
       flex: none;
     }
   }

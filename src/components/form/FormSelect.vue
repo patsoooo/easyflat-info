@@ -42,7 +42,7 @@ export default {
 <style lang="scss" scoped>
 .form-select {
   width: 100%;
-  max-width: 36.4rem;
+  // max-width: 36.4rem;
 }
 .var-select {
   border-radius: 1.2rem;
@@ -72,13 +72,8 @@ export default {
 }
 
 :deep(.var-field-decorator__controller) {
-  border: .16rem solid $bg-input !important;
   border-radius: 1.2rem !important;
   transition: border-color 0.3s ease !important;
-
-  &:focus-within {
-    border: .16rem solid $border-blue !important;
-  }
 }
 
 :deep(.var-select__select) {
@@ -89,5 +84,20 @@ export default {
 :deep(.var-select__label) {
   @include text-15-medium;
   color: $text-black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 30rem;
+}
+:deep(.var-option__text) {
+  @include text-15-regular;
+  color: $text-black;
+}
+:deep(.var-option--selected-background) {
+  background: $bg-blue-40;
+  .var-option__text {
+    @include text-15-medium;
+    color: $bg-blue;
+  }
 }
 </style>

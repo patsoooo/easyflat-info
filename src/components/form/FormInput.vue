@@ -29,7 +29,7 @@ export default {
 <style lang="scss" scoped>
 .form-input {
   width: 100%;
-  max-width: 36.4rem;
+  // max-width: 36.4rem;
 }
 .var-input {
   border-radius: 1.2rem;

@@ -1,6 +1,7 @@
 // TEXT 
 $text-black: #000000;
 $text-blue: #3265FF;
+$text-white: #fff;
 $text-grey-6: rgba(0, 0, 0, 0.6);
 $text-grey-1: rgba(0, 0, 0, 0.16);
 
@@ -9,11 +10,24 @@ $bg-white: #ffffff;
 $bg-blue: #3265FF;
 $bg-grey: #F6F6F6;
 $bg-blue-12: rgba(50, 101, 255, .12);
+$bg-blue-40: rgba(50, 101, 255, .4);
 
 // BORDER COLORS
 $border-grey: rgba(0, 0, 0, 0.12);
+$border-grey-8: rgba(0, 0, 0, 0.08);
 $border-blue: #3265FF;
 $border-black: #000;
+$border-form: #F3F3F3;
 
 // INPUTS
 $bg-input: #F5F5F5;
+
+// BUTTONS
+$btn-gray: #F3F3F3;
+$btn-red: rgba(211, 46, 27, .12);
+$btn-red-hover: rgba(211, 46, 27, .2);
+
+$btn-blue: #3265FF;
+
+$btn-blue-12: rgba(50, 101, 255, .12);
+$btn-blue-12-hover: rgba(50, 101, 255, .2);

@@ -13,6 +13,8 @@
           <StatusInPoland />
           <ContactInfo />
           <FinancialInformation />
+          <RentalHistory />
+          <AdditionalInformation />
         </div>
       </div>
       <div class="col-preview">
@@ -30,6 +32,8 @@ import PersonalInfo from '@/components/profile/PersonalInfo.vue';
 import FinancialInformation from '@/components/profile/FinancialInformation.vue';
 import StatusInPoland from '@/components/profile/StatusInPoland.vue';
 import ContactInfo from '@/components/profile/ContactInfo.vue';
+import AdditionalInformation from '@/components/profile/AdditionalInformation.vue';
+import RentalHistory from '@/components/profile/RentalHistory.vue';
 import Navigation from '@/components/profile/Navigation.vue';
 import Preview from '@/components/profile/Preview.vue';
 
@@ -42,6 +46,8 @@ export default {
     StatusInPoland,
     FinancialInformation,
     ContactInfo,
+    AdditionalInformation,
+    RentalHistory,
   },
   setup() {
     const router = useRouter();

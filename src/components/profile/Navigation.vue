@@ -7,7 +7,7 @@
         </div>
         <ul class="nav_links">
           <li>
-            <router-link class="active" to="/profile">
+            <router-link :class="{ active: $route.path === '/profile' }" to="/profile">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -39,7 +39,7 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/settings">
+            <router-link :class="{ active: $route.path === '/settings' }" to="/settings">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M9.67106 4.13615C9.72616 3.55649 9.99539 3.0182 10.4262 2.62643C10.8569
               2.23467 11.4183 2.01758 12.0006 2.01758C12.5828 2.01758 13.1442 2.23467 13.575
@@ -129,14 +129,13 @@ export default {
       a {
         display: flex;
         align-items: center;
-        padding: 1.2rem;
+        padding: 1rem 1.2rem;
         border-radius: 4rem;
         @include text-15-medium;
         svg {
           margin-right: .4rem;
         }
         &.active {
-          @include text-15-semibold;
           background-color: $bg-blue-12;
           color: $text-blue;
           .nav_icon {

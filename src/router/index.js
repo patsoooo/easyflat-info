@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue';
 import View from '../views/View.vue';
 import Profile from '../views/Profile.vue';
 import AccessCode from '../views/AccessCode.vue';
+import Settings from '../views/Settings.vue';
 
 const routes = [
   {
@@ -19,6 +20,20 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: Profile,
+    beforeEnter: (to, from, next) => {
+      // Перевіряємо чи є користувач в localStorage
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (currentUser.profileId) {
+        next();
+      } else {
+        next('/access');
+      }
+    },
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: Settings,
     beforeEnter: (to, from, next) => {
       // Перевіряємо чи є користувач в localStorage
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');

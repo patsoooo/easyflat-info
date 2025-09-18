@@ -1,6 +1,7 @@
 <template>
   <div class="preview">
     <div class="preview_tablet">
+      <div class="preview_gradient"></div>
       <div class="user">
         <div class="user_data">
           <div class="user_data-photo">NA</div>
@@ -187,9 +188,19 @@ export default {
     overflow-y: auto;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none;
+    position: relative;
     &::-webkit-scrollbar {
       display: none; /* Chrome, Safari, Opera */
     }
+  }
+  &_gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 20rem;
+    background: linear-gradient(180deg, #C8DEFD 0%, #fff 100%);
   }
 }
 </style>
