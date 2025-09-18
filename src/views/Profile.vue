@@ -7,8 +7,8 @@
           <PersonalInfo
             :firstName="userData.firstName"
             :lastName="userData.lastName"
-            @update:firstName="userData.firstName = $event"
-            @update:lastName="userData.lastName = $event"
+            @update:firstName="updateUserData('firstName', $event)"
+            @update:lastName="updateUserData('lastName', $event)"
           />
           <StatusInPoland />
           <ContactInfo />
@@ -18,16 +18,18 @@
         </div>
       </div>
       <div class="col-preview">
-          <Preview />
+        <Preview />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { reactive, onMounted } from 'vue';
+import {
+  reactive, onMounted, provide, computed,
+} from 'vue';
 import { useRouter } from 'vue-router';
-import { getUserByProfileId } from '@/services/userService';
+import { getUserByProfileId, generateFullName, generateInitials } from '@/services/userService';
 import PersonalInfo from '@/components/profile/PersonalInfo.vue';
 import FinancialInformation from '@/components/profile/FinancialInformation.vue';
 import StatusInPoland from '@/components/profile/StatusInPoland.vue';
@@ -52,11 +54,87 @@ export default {
   setup() {
     const router = useRouter();
 
-    // Дані користувача
+    // Повні дані користувача
     const userData = reactive({
+      // Базові поля
       firstName: '',
       lastName: '',
+      name: '',
+      initials: '',
+      citizenshipStatus: 'foreigner',
+      timeInPoland: 'less_than_1',
+      gender: 'male',
+      residenceDocument: 'residence_card',
+      description: '',
+
+      // Контакти
+      contact: {
+        phone: null,
+        email: null,
+      },
+
+      // Соціальні мережі
+      socialMedia: {
+        whatsapp: null,
+        instagram: null,
+        facebook: null,
+        telegram: null,
+      },
+
+      // Робота
+      workplace: {
+        company: null,
+        position: null,
+        workInfo: null,
+        salaryRange: null,
+        incomeDocument: null,
+        workDuration: null,
+      },
+
+      // Історія оренди
+      rentalHistory: [],
+
+      // Додаткова інформація
+      additionalInfo: {
+        languages: [],
+        languagesText: null,
+        hasPets: false,
+        petTypes: [],
+        petsText: null,
+        flatmates: null,
+        smoking: false,
+        budget: null,
+        rentalDuration: null,
+        moveInDate: null,
+        moveInDateText: null,
+      },
     });
+
+    // Computed властивості для автоматичного оновлення
+    const computedUserData = computed(() => ({
+      ...userData,
+      name: generateFullName(userData.firstName, userData.lastName),
+      initials: generateInitials(userData.firstName, userData.lastName),
+    }));
+
+    // Функція оновлення даних (визначаємо перед використанням)
+    function updateUserData(field, value) {
+      // Підтримка nested fields (наприклад, 'contact.phone')
+      const keys = field.split('.');
+      let target = userData;
+
+      for (let i = 0; i < keys.length - 1; i += 1) {
+        target = target[keys[i]];
+      }
+
+      target[keys[keys.length - 1]] = value;
+
+      console.log(`Оновлено ${field}:`, value);
+    }
+
+    // Provide дані для дочірніх компонентів
+    provide('userData', computedUserData);
+    provide('updateUserData', updateUserData);
 
     // Завантаження даних користувача
     const loadUserData = async () => {
@@ -64,31 +142,69 @@ export default {
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
         if (!currentUser.profileId) {
-          router.push('/access');
+          router.push('/login');
           return;
         }
 
         const user = await getUserByProfileId(currentUser.profileId);
 
         if (user) {
-          userData.firstName = user.firstName || '';
-          userData.lastName = user.lastName || '';
+          // Копіюємо всі дані в reactive об'єкт
+          Object.assign(userData, {
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            citizenshipStatus: user.citizenshipStatus || '',
+            timeInPoland: user.timeInPoland || '',
+            gender: user.gender || '',
+            description: user.description || '',
+            contact: user.contact || { phone: null, email: null },
+            socialMedia: user.socialMedia || {
+              whatsapp: null,
+              instagram: null,
+              facebook: null,
+              telegram: null,
+            },
+            workplace: user.workplace || {
+              company: null,
+              position: null,
+              workInfo: null,
+              salaryRange: null,
+              incomeDocument: null,
+              workDuration: null,
+            },
+            rentalHistory: user.rentalHistory || [],
+            additionalInfo: user.additionalInfo || {
+              languages: [],
+              languagesText: null,
+              hasPets: false,
+              petTypes: [],
+              petsText: null,
+              flatmates: null,
+              smoking: false,
+              budget: null,
+              rentalDuration: null,
+              moveInDate: null,
+              moveInDateText: null,
+            },
+          });
+
+          console.log('Всі дані користувача завантажено:', user);
         } else {
           console.error('Користувача не знайдено');
-          router.push('/access');
+          router.push('/login');
         }
       } catch (error) {
         console.error('Помилка завантаження даних:', error);
       }
     };
 
-    // Завантажуємо дані при монтуванні компонента
     onMounted(() => {
       loadUserData();
     });
 
     return {
       userData,
+      updateUserData,
     };
   },
 };

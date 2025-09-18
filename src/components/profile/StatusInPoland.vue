@@ -44,13 +44,15 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import {
+  ref, inject, watch,
+} from 'vue';
 import {
   updateUser,
-  getUserByProfileId,
   CITIZENSHIP_STATUS,
   TIME_IN_POLAND,
   RESIDENCE_DOCUMENTS,
+  generateDescription,
 } from '@/services/userService';
 import FormSelect from '@/components/form/FormSelect.vue';
 import FormRadioGroup from '@/components/form/FormRadioGroup.vue';
@@ -66,49 +68,42 @@ export default {
     FormRadio,
   },
   setup() {
+    // Inject даних з батьківського компонента
+    const userData = inject('userData', null);
+    const updateUserData = inject('updateUserData', null);
+
     const localCitizenshipStatus = ref('');
     const localTimeInPoland = ref('');
     const localResidenceDocument = ref('');
     const successMessage = ref('');
     const errorMessage = ref('');
 
-    // Опції для громадянства
+    // Опції для селектів
     const citizenshipOptions = Object.keys(CITIZENSHIP_STATUS).map((key) => ({
       label: CITIZENSHIP_STATUS[key].label,
       value: CITIZENSHIP_STATUS[key].value,
     }));
 
-    // Опції для часу в Польщі
     const timeInPolandOptions = Object.keys(TIME_IN_POLAND).map((key) => ({
       label: TIME_IN_POLAND[key].label,
       value: TIME_IN_POLAND[key].value,
     }));
 
-    // Опції для документів
     const residenceDocumentOptions = Object.keys(RESIDENCE_DOCUMENTS).map((key) => ({
       label: RESIDENCE_DOCUMENTS[key].label,
       value: RESIDENCE_DOCUMENTS[key].value,
     }));
 
-    // Завантаження поточних даних користувача
-    const loadUserData = async () => {
-      try {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        if (!currentUser.profileId) return;
-
-        const user = await getUserByProfileId(currentUser.profileId);
-        if (user) {
-          localCitizenshipStatus.value = user.citizenshipStatus || 'foreigner';
-          localTimeInPoland.value = user.timeInPoland || 'less_than_1';
-          localResidenceDocument.value = user.residenceDocument || 'residence_card';
-        }
-      } catch (error) {
-        console.error('Помилка завантаження даних:', error);
-        errorMessage.value = 'Помилка завантаження даних';
+    // Синхронізація з userData при зміні
+    watch(() => userData?.value, (newUserData) => {
+      if (newUserData) {
+        localCitizenshipStatus.value = newUserData.citizenshipStatus || 'foreigner';
+        localTimeInPoland.value = newUserData.timeInPoland || 'less_than_1';
+        localResidenceDocument.value = newUserData.residenceDocument || 'residence_card';
       }
-    };
+    }, { immediate: true });
 
-    // Показ повідомлення про успіх
+    // Показ повідомлень
     const showSuccessMessage = () => {
       successMessage.value = 'Збережено';
       errorMessage.value = '';
@@ -117,7 +112,6 @@ export default {
       }, 2000);
     };
 
-    // Показ повідомлення про помилку
     const showErrorMessage = (message) => {
       errorMessage.value = message;
       successMessage.value = '';
@@ -130,6 +124,15 @@ export default {
     const handleCitizenshipChange = async (value) => {
       localCitizenshipStatus.value = value;
 
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('citizenshipStatus', value);
+        // Оновлюємо опис автоматично
+        const newDescription = generateDescription(value, localTimeInPoland.value);
+        updateUserData('description', newDescription);
+      }
+
+      // Зберігаємо в базу даних
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
         showErrorMessage('Помилка: користувач не знайдений');
@@ -137,13 +140,14 @@ export default {
       }
 
       try {
-        await updateUser(currentUser.profileId, { citizenshipStatus: value });
+        await updateUser(currentUser.profileId, {
+          citizenshipStatus: value,
+          description: generateDescription(value, localTimeInPoland.value),
+        });
         showSuccessMessage();
       } catch (error) {
         console.error('Помилка оновлення статусу громадянства:', error);
         showErrorMessage('Помилка при збереженні статусу громадянства');
-        // Відновлення попереднього значення при помилці
-        loadUserData();
       }
     };
 
@@ -151,6 +155,15 @@ export default {
     const handleTimeInPolandChange = async (value) => {
       localTimeInPoland.value = value;
 
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('timeInPoland', value);
+        // Оновлюємо опис автоматично
+        const newDescription = generateDescription(localCitizenshipStatus.value, value);
+        updateUserData('description', newDescription);
+      }
+
+      // Зберігаємо в базу даних
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
         showErrorMessage('Помилка: користувач не знайдений');
@@ -158,13 +171,14 @@ export default {
       }
 
       try {
-        await updateUser(currentUser.profileId, { timeInPoland: value });
+        await updateUser(currentUser.profileId, {
+          timeInPoland: value,
+          description: generateDescription(localCitizenshipStatus.value, value),
+        });
         showSuccessMessage();
       } catch (error) {
         console.error('Помилка оновлення часу в Польщі:', error);
         showErrorMessage('Помилка при збереженні часу в Польщі');
-        // Відновлення попереднього значення при помилці
-        loadUserData();
       }
     };
 
@@ -172,6 +186,12 @@ export default {
     const handleResidenceDocumentChange = async (value) => {
       localResidenceDocument.value = value;
 
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('residenceDocument', value);
+      }
+
+      // Зберігаємо в базу даних
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
         showErrorMessage('Помилка: користувач не знайдений');
@@ -184,15 +204,8 @@ export default {
       } catch (error) {
         console.error('Помилка оновлення документа перебування:', error);
         showErrorMessage('Помилка при збереженні документа перебування');
-        // Відновлення попереднього значення при помилці
-        loadUserData();
       }
     };
-
-    // Завантажуємо дані при монтуванні
-    onMounted(() => {
-      loadUserData();
-    });
 
     return {
       localCitizenshipStatus,

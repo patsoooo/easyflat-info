@@ -85,7 +85,9 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import {
+  ref, onMounted, inject, watch,
+} from 'vue';
 import {
   updateUser,
   getUserByProfileId,
@@ -115,7 +117,10 @@ export default {
     FormDatePicker,
   },
   setup() {
-    // Локальні стани для additionalInfo полів
+    // Inject function from parent Profile.vue
+    const updateUserData = inject('updateUserData', null);
+
+    // Local states for additionalInfo fields
     const localLanguages = ref([]);
     const localHasPets = ref(false);
     const localPetTypes = ref([]);
@@ -128,7 +133,37 @@ export default {
     const successMessage = ref('');
     const errorMessage = ref('');
 
-    // Опції для селектів/чекбоксів/радіо
+    // Helper function to update preview immediately
+    const updatePreviewData = () => {
+      if (updateUserData) {
+        updateUserData('additionalInfo', {
+          languages: localLanguages.value,
+          hasPets: localHasPets.value,
+          petTypes: localPetTypes.value,
+          flatmates: localFlatmates.value,
+          smoking: localSmoking.value,
+          budget: localBudget.value,
+          rentalDuration: localRentalDuration.value,
+          moveInDate: localMoveInDate.value,
+        });
+      }
+    };
+
+    // Watch all local states and update preview
+    watch([
+      localLanguages,
+      localHasPets,
+      localPetTypes,
+      localFlatmates,
+      localSmoking,
+      localBudget,
+      localRentalDuration,
+      localMoveInDate,
+    ], () => {
+      updatePreviewData();
+    }, { deep: true });
+
+    // Options for selects/checkboxes/radios
     const languageOptions = Object.keys(LANGUAGES).map((key) => ({
       label: LANGUAGES[key].label,
       value: LANGUAGES[key].value,
@@ -164,7 +199,7 @@ export default {
       value: RENTAL_DURATION[key].value,
     }));
 
-    // Завантаження поточних даних користувача
+    // Load current user data
     const loadUserData = async () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -181,6 +216,9 @@ export default {
           localBudget.value = info.budget || '';
           localRentalDuration.value = info.rentalDuration || '';
           localMoveInDate.value = info.moveInDate || null;
+
+          // Update preview data after loading
+          updatePreviewData();
         }
       } catch (error) {
         console.error('Помилка завантаження даних:', error);
@@ -188,7 +226,7 @@ export default {
       }
     };
 
-    // Показ повідомлення про успіх
+    // Success/error message functions
     const showSuccessMessage = () => {
       successMessage.value = 'Збережено';
       errorMessage.value = '';
@@ -197,7 +235,6 @@ export default {
       }, 2000);
     };
 
-    // Показ повідомлення про помилку
     const showErrorMessage = (message) => {
       errorMessage.value = message;
       successMessage.value = '';
@@ -206,7 +243,7 @@ export default {
       }, 3000);
     };
 
-    // Отримання поточних additionalInfo даних
+    // Get current additionalInfo data
     const getCurrentAdditionalInfo = async () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -241,7 +278,7 @@ export default {
       }
     };
 
-    // Функція оновлення additionalInfo
+    // Update additionalInfo function
     const updateAdditionalInfo = async (field, value) => {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
@@ -260,67 +297,76 @@ export default {
       } catch (error) {
         console.error(`Помилка оновлення ${field}:`, error);
         showErrorMessage(`Помилка при збереженні ${field}`);
-        loadUserData(); // Відновлення попереднього значення
+        loadUserData(); // Restore previous value
       }
     };
 
-    // Обробники змін полів
+    // Field change handlers
     const handleLanguagesChange = async (value) => {
       localLanguages.value = value;
+      // Preview updates automatically via watcher
       await updateAdditionalInfo('languages', value);
     };
 
     const handleHasPetsChange = async (value) => {
       localHasPets.value = value;
 
-      // Якщо вибрали "Ні", очищаємо типи тварин
+      // If selected "No", clear pet types
       if (value === false || value === 'no') {
         localPetTypes.value = [];
         await updateAdditionalInfo('petTypes', []);
       }
 
+      // Preview updates automatically via watcher
       await updateAdditionalInfo('hasPets', value);
     };
 
     const handlePetTypesChange = async (value) => {
       localPetTypes.value = value;
+      // Preview updates automatically via watcher
       await updateAdditionalInfo('petTypes', value);
     };
 
     const handleFlatmatesChange = async (value) => {
       localFlatmates.value = value;
+      // Preview updates automatically via watcher
       await updateAdditionalInfo('flatmates', value);
     };
 
     const handleSmokingChange = async (value) => {
       localSmoking.value = value;
+      // Preview updates automatically via watcher
       await updateAdditionalInfo('smoking', value);
     };
 
     const handleBudgetChange = async (value) => {
       localBudget.value = value;
+      // Preview updates automatically via watcher
       await updateAdditionalInfo('budget', value);
     };
 
     const handleRentalDurationChange = async (value) => {
       localRentalDuration.value = value;
+      // Preview updates automatically via watcher
       await updateAdditionalInfo('rentalDuration', value);
     };
 
     const handleMoveInDateChange = async (value) => {
       localMoveInDate.value = value;
-      // Конвертуємо дату в ISO формат для збереження
+      // Preview updates automatically via watcher
+
+      // Convert date to ISO format for saving
       const isoDate = value ? new Date(value).toISOString().split('T')[0] : null;
       await updateAdditionalInfo('moveInDate', isoDate);
     };
 
-    // Завантажуємо дані при монтуванні
+    // Load data on mount
     onMounted(() => {
       loadUserData();
     });
 
     return {
-      // Локальні стани
+      // Local states
       localLanguages,
       localHasPets,
       localPetTypes,
@@ -330,7 +376,7 @@ export default {
       localRentalDuration,
       localMoveInDate,
 
-      // Опції для селектів
+      // Options for selects
       languageOptions,
       petOwnershipOptions,
       petTypeOptions,
@@ -339,11 +385,11 @@ export default {
       budgetOptions,
       rentalDurationOptions,
 
-      // Повідомлення
+      // Messages
       successMessage,
       errorMessage,
 
-      // Обробники
+      // Handlers
       handleLanguagesChange,
       handleHasPetsChange,
       handlePetTypesChange,

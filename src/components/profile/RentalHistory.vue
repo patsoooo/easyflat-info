@@ -126,7 +126,9 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import {
+  ref, onMounted, inject, watch,
+} from 'vue';
 import {
   updateUser,
   getUserByProfileId,
@@ -151,12 +153,15 @@ export default {
     FormDatePicker,
   },
   setup() {
+    // Inject functions from parent Profile.vue
+    const updateUserData = inject('updateUserData', null);
+
     const localRentalHistory = ref([]);
-    const editingIndex = ref(null); // Індекс поточного елементу що редагується
+    const editingIndex = ref(null);
     const successMessage = ref('');
     const errorMessage = ref('');
 
-    // Опції для селектів
+    // Options for selects
     const cityOptions = Object.keys(CITIES).map((key) => ({
       label: CITIES[key].label,
       value: CITIES[key].value,
@@ -167,7 +172,41 @@ export default {
       value: RENTAL_CONFIRMATIONS[key].value,
     }));
 
-    // Функція для конвертації дати в місяць/рік для Firebase
+    // Watch local rental history and update parent for preview
+    watch(localRentalHistory, (newValue) => {
+      if (updateUserData) {
+        // Convert the local data format to the format expected by Preview
+        const previewData = newValue.map((period) => ({
+          ...period,
+          // Ensure we have the processed fields that Preview expects
+          address: period.street || null,
+          city: period.city || null,
+          startMonth: period.startMonth || null,
+          startYear: period.startYear || null,
+          endMonth: period.endMonth || null,
+          endYear: period.endYear || null,
+          isCurrentlyRenting: period.isCurrentlyRenting || false,
+          landlordContact: period.landlordContact || null,
+          rentalConfirmation: period.rentalConfirmation || null,
+        }));
+
+        updateUserData('rentalHistory', previewData);
+      }
+    }, { deep: true });
+
+    // Helper function to update preview immediately
+    const updatePreviewData = () => {
+      if (updateUserData) {
+        const previewData = localRentalHistory.value.map((period) => ({
+          ...period,
+          address: period.street || null,
+          city: period.city || null,
+        }));
+        updateUserData('rentalHistory', previewData);
+      }
+    };
+
+    // Date conversion functions
     const dateToMonthYear = (dateString) => {
       if (!dateString) return { month: null, year: null };
       const date = new Date(dateString);
@@ -177,14 +216,12 @@ export default {
       };
     };
 
-    // Функція для конвертації місяць/рік в дату для FormDatePicker
     const monthYearToDate = (month, year) => {
       if (!month || !year) return null;
-      // Встановлюємо 1 число місяця
       return new Date(year, month - 1, 1).toISOString().split('T')[0];
     };
 
-    // Завантаження поточних даних користувача
+    // Load user data
     const loadUserData = async () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -194,14 +231,14 @@ export default {
         if (user && user.rentalHistory) {
           localRentalHistory.value = user.rentalHistory.map((period) => ({
             ...period,
-            // Конвертуємо місяць/рік в дати для FormDatePicker
             startDate: monthYearToDate(period.startMonth, period.startYear),
             endDate: monthYearToDate(period.endMonth, period.endYear),
-            // Для чекбокса потрібен масив
             isCurrentlyRentingArray: period.isCurrentlyRenting ? [true] : [],
           }));
 
-          // Якщо є записи, показуємо форму для останнього
+          // Update preview data immediately after loading
+          updatePreviewData();
+
           if (localRentalHistory.value.length > 0) {
             editingIndex.value = localRentalHistory.value.length - 1;
           }
@@ -212,7 +249,7 @@ export default {
       }
     };
 
-    // Показ повідомлення про успіх
+    // Success/error message functions
     const showSuccessMessage = () => {
       successMessage.value = 'Збережено';
       errorMessage.value = '';
@@ -221,7 +258,6 @@ export default {
       }, 2000);
     };
 
-    // Показ повідомлення про помилку
     const showErrorMessage = (message) => {
       errorMessage.value = message;
       successMessage.value = '';
@@ -230,7 +266,7 @@ export default {
       }, 3000);
     };
 
-    // Функція оновлення rentalHistory
+    // Update rental history in database
     const updateRentalHistory = async () => {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
@@ -239,13 +275,11 @@ export default {
       }
 
       try {
-        // Підготовка даних для збереження
         const dataToSave = localRentalHistory.value.map((period) => {
           const {
             isCurrentlyRentingArray, startDate, endDate, ...periodData
           } = period;
 
-          // Конвертуємо дати назад в місяць/рік для Firebase
           const startDateData = dateToMonthYear(startDate);
           const endDateData = dateToMonthYear(endDate);
 
@@ -261,26 +295,27 @@ export default {
         await updateUser(currentUser.profileId, {
           rentalHistory: dataToSave,
         });
+
+        // Update preview after successful save
+        updatePreviewData();
         showSuccessMessage();
       } catch (error) {
         console.error('Помилка оновлення історії оренди:', error);
         showErrorMessage('Помилка при збереженні історії оренди');
-        loadUserData(); // Відновлення попереднього значення
+        loadUserData(); // Restore previous value
       }
     };
 
-    // Редагування періоду (відкрити/закрити форму)
+    // Edit period
     const editPeriod = (index) => {
-      // Якщо клікнули на той самий період що вже редагується - закриваємо
       if (editingIndex.value === index) {
         editingIndex.value = null;
       } else {
-        // Інакше відкриваємо форму для вибраного періоду
         editingIndex.value = index;
       }
     };
 
-    // Додавання нового періоду
+    // Add new period
     const addNewPeriod = () => {
       const newIndex = localRentalHistory.value.length;
       localRentalHistory.value.push({
@@ -298,66 +333,79 @@ export default {
         rentalConfirmation: '',
       });
 
-      // Відкриваємо форму для нового періоду
       editingIndex.value = newIndex;
+      // Preview will update automatically via watcher
     };
 
-    // Видалення періоду
+    // Remove period
     const removePeriod = async (index) => {
       localRentalHistory.value.splice(index, 1);
 
-      // Якщо видаляємо період що редагується, закриваємо форму
       if (editingIndex.value === index) {
         editingIndex.value = null;
       } else if (editingIndex.value > index) {
-        // Якщо видаляємо період перед тим що редагується, коригуємо індекс
         editingIndex.value -= 1;
       }
 
       await updateRentalHistory();
     };
 
-    // Оновлення поля періоду
+    // Update period field
     const updatePeriodField = async (index, field, value) => {
       localRentalHistory.value[index][field] = value;
+
+      // Update preview immediately for better UX
+      updatePreviewData();
+
+      // Then save to database
       await updateRentalHistory();
     };
 
-    // Оновлення дати початку
+    // Update start date
     const updateStartDate = async (index, value) => {
       localRentalHistory.value[index].startDate = value;
       const { month, year } = dateToMonthYear(value);
       localRentalHistory.value[index].startMonth = month;
       localRentalHistory.value[index].startYear = year;
+
+      // Update preview immediately
+      updatePreviewData();
+
       await updateRentalHistory();
     };
 
-    // Оновлення дати закінчення
+    // Update end date
     const updateEndDate = async (index, value) => {
       localRentalHistory.value[index].endDate = value;
       const { month, year } = dateToMonthYear(value);
       localRentalHistory.value[index].endMonth = month;
       localRentalHistory.value[index].endYear = year;
+
+      // Update preview immediately
+      updatePreviewData();
+
       await updateRentalHistory();
     };
 
-    // Оновлення статусу поточної оренди
+    // Update currently renting status
     const updateCurrentlyRenting = async (index, value) => {
       const isCurrentlyRenting = value.includes(true);
       localRentalHistory.value[index].isCurrentlyRenting = isCurrentlyRenting;
       localRentalHistory.value[index].isCurrentlyRentingArray = value;
 
-      // Якщо орендує зараз, очищаємо дати закінчення
       if (isCurrentlyRenting) {
         localRentalHistory.value[index].endDate = null;
         localRentalHistory.value[index].endMonth = null;
         localRentalHistory.value[index].endYear = null;
       }
 
+      // Update preview immediately
+      updatePreviewData();
+
       await updateRentalHistory();
     };
 
-    // Завантажуємо дані при монтуванні
+    // Load data on mount
     onMounted(() => {
       loadUserData();
     });

@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, inject, watch } from 'vue';
 import { updateUser, getUserByProfileId } from '@/services/userService';
 import FormGroup from '@/components/form/FormGroup.vue';
 import FormInput from '@/components/form/FormInput.vue';
@@ -70,6 +70,10 @@ export default {
     FormGroup,
   },
   setup() {
+    // Inject даних з батьківського компонента
+    const userData = inject('userData', null);
+    const updateUserData = inject('updateUserData', null);
+
     // Локальні стани для контактів
     const localPhone = ref('');
     const localEmail = ref('');
@@ -83,31 +87,22 @@ export default {
     const successMessage = ref('');
     const errorMessage = ref('');
 
-    // Завантаження поточних даних користувача
-    const loadUserData = async () => {
-      try {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        if (!currentUser.profileId) return;
+    // Синхронізація з userData при зміні
+    watch(() => userData?.value, (newUserData) => {
+      if (newUserData) {
+        // Контактні дані
+        localPhone.value = newUserData.contact?.phone || '';
+        localEmail.value = newUserData.contact?.email || '';
 
-        const user = await getUserByProfileId(currentUser.profileId);
-        if (user) {
-          // Контактні дані
-          localPhone.value = user.contact?.phone || '';
-          localEmail.value = user.contact?.email || '';
-
-          // Соціальні мережі
-          localFacebook.value = user.socialMedia?.facebook || '';
-          localInstagram.value = user.socialMedia?.instagram || '';
-          localTelegram.value = user.socialMedia?.telegram || '';
-          localWhatsapp.value = user.socialMedia?.whatsapp || '';
-        }
-      } catch (error) {
-        console.error('Помилка завантаження даних:', error);
-        errorMessage.value = 'Помилка завантаження даних';
+        // Соціальні мережі
+        localFacebook.value = newUserData.socialMedia?.facebook || '';
+        localInstagram.value = newUserData.socialMedia?.instagram || '';
+        localTelegram.value = newUserData.socialMedia?.telegram || '';
+        localWhatsapp.value = newUserData.socialMedia?.whatsapp || '';
       }
-    };
+    }, { immediate: true });
 
-    // Показ повідомлення про успіх
+    // Показ повідомлень
     const showSuccessMessage = () => {
       successMessage.value = 'Збережено';
       errorMessage.value = '';
@@ -116,7 +111,6 @@ export default {
       }, 2000);
     };
 
-    // Показ повідомлення про помилку
     const showErrorMessage = (message) => {
       errorMessage.value = message;
       successMessage.value = '';
@@ -125,13 +119,12 @@ export default {
       }, 3000);
     };
 
-    // Валідація email
+    // Валідація
     const isValidEmail = (email) => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
     };
 
-    // Валідація телефону
     const isValidPhone = (phone) => {
       const phoneRegex = /^\+?[1-9]\d{1,14}$/;
       return phoneRegex.test(phone.replace(/[\s\-()]/g, ''));
@@ -185,7 +178,6 @@ export default {
       } catch (error) {
         console.error(`Помилка оновлення ${field}:`, error);
         showErrorMessage(`Помилка при збереженні ${field}`);
-        loadUserData(); // Відновлення попереднього значення
       }
     };
 
@@ -208,13 +200,17 @@ export default {
       } catch (error) {
         console.error(`Помилка оновлення ${field}:`, error);
         showErrorMessage(`Помилка при збереженні ${field}`);
-        loadUserData(); // Відновлення попереднього значення
       }
     };
 
     // Обробники змін контактних даних
     const handlePhoneChange = async (value) => {
       localPhone.value = value;
+
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('contact.phone', value || null);
+      }
 
       if (value && !isValidPhone(value)) {
         showErrorMessage('Невірний формат номера телефону');
@@ -227,6 +223,11 @@ export default {
     const handleEmailChange = async (value) => {
       localEmail.value = value;
 
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('contact.email', value || null);
+      }
+
       if (value && !isValidEmail(value)) {
         showErrorMessage('Невірний формат email');
         return;
@@ -238,28 +239,47 @@ export default {
     // Обробники змін соціальних мереж
     const handleFacebookChange = async (value) => {
       localFacebook.value = value;
+
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('socialMedia.facebook', value || null);
+      }
+
       await updateSocialMedia('facebook', value);
     };
 
     const handleInstagramChange = async (value) => {
       localInstagram.value = value;
+
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('socialMedia.instagram', value || null);
+      }
+
       await updateSocialMedia('instagram', value);
     };
 
     const handleTelegramChange = async (value) => {
       localTelegram.value = value;
+
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('socialMedia.telegram', value || null);
+      }
+
       await updateSocialMedia('telegram', value);
     };
 
     const handleWhatsappChange = async (value) => {
       localWhatsapp.value = value;
+
+      // Оновлюємо дані в батьківському компоненті (для Preview)
+      if (updateUserData) {
+        updateUserData('socialMedia.whatsapp', value || null);
+      }
+
       await updateSocialMedia('whatsapp', value);
     };
-
-    // Завантажуємо дані при монтуванні
-    onMounted(() => {
-      loadUserData();
-    });
 
     return {
       // Контактні дані

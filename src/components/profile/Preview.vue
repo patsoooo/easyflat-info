@@ -4,109 +4,115 @@
       <div class="preview_gradient"></div>
       <div class="user">
         <div class="user_data">
-          <div class="user_data-photo">NA</div>
+          <!-- Реальні дані з inject -->
+          <div class="user_data-photo">{{ userData?.initials || 'NA' }}</div>
           <div class="user_data-name">
-            John Watson
+            {{ userData?.name || 'Введіть ім\'я...' }}
           </div>
           <div class="user_data-desc">
-            Іноземець, від 2 до 4 років в Польщі
+            {{ getSimpleDescription() || 'Оберіть статус і час перебування в Польщі' }}
           </div>
 
-          <ul class="user_data-social">
-            <li >
-              <a target="_blank">
+          <!-- Соціальні мережі - показуємо тільки якщо є дані -->
+          <ul v-if="hasSocialMedia" class="user_data-social">
+            <li v-if="userData?.socialMedia?.whatsapp">
+              <a :href="userData.socialMedia.whatsapp" target="_blank">
                 <img src="../../img/social/whatsapp.svg" alt="whatsapp">
               </a>
             </li>
-            <li >
-              <a target="_blank">
+            <li v-if="userData?.socialMedia?.instagram">
+              <a :href="userData.socialMedia.instagram" target="_blank">
                 <img src="../../img/social/instagram.svg" alt="instagram">
               </a>
             </li>
-            <li>
-              <a target="_blank">
+            <li v-if="userData?.socialMedia?.facebook">
+              <a :href="userData.socialMedia.facebook" target="_blank">
                 <img src="../../img/social/fb.svg" alt="facebook">
               </a>
             </li>
-            <li >
-              <a target="_blank">
+            <li v-if="userData?.socialMedia?.telegram">
+              <a :href="userData.socialMedia.telegram" target="_blank">
                 <img src="../../img/social/linkedin.svg" alt="telegram">
               </a>
             </li>
           </ul>
         </div>
 
-        <!-- Контакт - показуємо тільки якщо є телефон або email -->
-        <div class="user_section">
+        <!-- Контакт - показуємо тільки якщо є дані -->
+        <div v-if="hasContactInfo" class="user_section">
           <span class="user_section-title">Контакт</span>
           <ul class="user_list">
-            <li class="user_info">
+            <li v-if="userData?.contact?.phone" class="user_info">
               <img src="../../img/icons/phone.svg" alt="phone">
               <div class="user_info-data">
-                <p>+48000999111</p>
+                <p>{{ userData.contact.phone }}</p>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.contact?.email" class="user_info">
               <img src="../../img/icons/email.svg" alt="email">
               <div class="user_info-data">
-                <p>user@example.com</p>
+                <p>{{ userData.contact.email }}</p>
               </div>
             </li>
           </ul>
         </div>
 
-        <!-- Місце роботи -->
-        <div class="user_section">
+        <!-- Місце роботи - показуємо тільки якщо є дані -->
+        <div v-if="hasWorkplaceInfo" class="user_section">
           <span class="user_section-title">Місце роботи</span>
           <ul class="user_list">
-            <li class="user_info">
+            <li v-if="userData?.workplace?.workInfo" class="user_info">
               <img src="../../img/icons/work.svg" alt="work">
               <div class="user_info-data">
-                <p>Microsoft, Software Engineer</p>
+                <p>{{ userData.workplace.workInfo }}</p>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.workplace?.salaryRange" class="user_info">
               <img src="../../img/icons/money.svg" alt="money">
               <div class="user_info-data">
-                <p>7000–9000 zł/місяць</p>
-                <span>
-                  Орендар надасть довідку про зарплату
+                <p>{{ getSimpleSalaryRangeText() }}</p>
+                <span v-if="userData?.workplace?.incomeDocument">
+                  {{ getSimpleIncomeDocumentText() }}
                 </span>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.workplace?.workDuration" class="user_info">
               <img src="../../img/icons/time.svg" alt="time">
               <div class="user_info-data">
-                <p>працює від 3 до 5 років</p>
+                <p>{{ getSimpleWorkDurationText() }}</p>
               </div>
             </li>
           </ul>
         </div>
 
         <!-- Історія оренди -->
-        <div class="user_section">
+        <div v-if="hasRentalHistory" class="user_section">
           <span class="user_section-title">Історія оренди</span>
           <div class="user_history">
-            <div >
-              <span class="user_history-title">Березень 2024 - до зараз</span>
+            <div
+              v-for="(period, index) in userData.rentalHistory"
+              :class="{ 'user_history-last': index === userData.rentalHistory.length - 1 }"
+              :key="index"
+            >
+              <span class="user_history-title">{{ getSimpleRentalPeriodText(period) }}</span>
               <ul class="user_list">
-                <li class="user_info">
+                <li v-if="period?.address" class="user_info">
                   <img src="../../img/icons/location.svg" alt="location">
                   <div class="user_info-data">
-                    <p>Osiedle Avia 1B</p>
-                    <span>Краків, Польща</span>
+                    <p>{{ period.address }}</p>
+                    <span v-if="period?.city">{{ getSimpleCityText(period.city) }}</span>
                   </div>
                 </li>
-                <li class="user_info">
+                <li v-if="period?.landlordContact" class="user_info">
                   <img src="../../img/icons/phone.svg" alt="phone">
                   <div class="user_info-data">
-                    <p>Номер орендодавця: +48 799 098 123</p>
+                    <p>{{ getSimpleLandlordContactText(period.landlordContact) }}</p>
                   </div>
                 </li>
-                <li class="user_info">
+                <li v-if="period?.rentalConfirmation" class="user_info">
                   <img src="../../img/icons/money.svg" alt="money">
                   <div class="user_info-data">
-                    <p>Орендар може надати банківські підтвердження платежів за оренду</p>
+                    <p>{{ getSimpleRentalConfirmationText(period.rentalConfirmation) }}</p>
                   </div>
                 </li>
               </ul>
@@ -114,50 +120,52 @@
           </div>
         </div>
 
-  <!-- Додаткова інформація - показуємо тільки якщо є хоча б одне поле -->
-        <div class="user_section">
+        <!-- Додаткова інформація -->
+        <div v-if="hasAdditionalInfo" class="user_section">
           <span class="user_section-title">Додаткова інформація</span>
           <ul class="user_list">
-            <li class="user_info">
+            <li v-if="userData?.additionalInfo?.languages?.length > 0" class="user_info">
               <img src="../../img/icons/language.svg" alt="language">
               <div class="user_info-data">
-                <p>Володіння мовами: Англійська, Українська і Польська</p>
+                <p>{{ getSimpleLanguagesText() }}</p>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.additionalInfo?.hasPets !== null
+            && userData?.additionalInfo?.hasPets !== undefined" class="user_info">
               <img src="../../img/icons/pets.svg" alt="pets">
               <div class="user_info-data">
-                <p>Орендар має домашніх тварин</p>
+                <p>{{ getSimplePetsText() }}</p>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.additionalInfo?.flatmates" class="user_info">
               <img src="../../img/icons/flatmates.svg" alt="flatmates">
               <div class="user_info-data">
-                <p>Орендар шукає житло з партнером</p>
+                <p>{{ getSimpleFlatmatesText() }}</p>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.additionalInfo?.smoking !== null
+            && userData?.additionalInfo?.smoking !== undefined" class="user_info">
               <img src="../../img/icons/smoke.svg" alt="smoke">
               <div class="user_info-data">
-                <p>Не палить</p>
+                <p>{{ getSimpleSmokingText() }}</p>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.additionalInfo?.budget" class="user_info">
               <img src="../../img/icons/money.svg" alt="money">
               <div class="user_info-data">
-                <p>Бюджет: 3500–4500 zł/місяць</p>
+                <p>{{ getSimpleBudgetText() }}</p>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.additionalInfo?.rentalDuration" class="user_info">
               <img src="../../img/icons/time.svg" alt="time">
               <div class="user_info-data">
-                <p>Оренда мінімум на рік</p>
+                <p>{{ getSimpleRentalDurationText() }}</p>
               </div>
             </li>
-            <li class="user_info">
+            <li v-if="userData?.additionalInfo?.moveInDate" class="user_info">
               <img src="../../img/icons/calendar.svg" alt="calendar">
               <div class="user_info-data">
-                <p>Бажана дата заселення: 1 жовтня 2025</p>
+                <p>{{ getSimpleMoveInDateText() }}</p>
               </div>
             </li>
           </ul>
@@ -166,11 +174,68 @@
     </div>
   </div>
 </template>
+
 <script>
+import { inject } from 'vue';
+import useUserDisplay from '@/composables/useUserDisplay';
+
 export default {
   name: 'PreviewProfile',
+  setup() {
+    // Inject даних з батьківського компонента
+    const userData = inject('userData', null);
+
+    // Використовуємо композабл для логіки відображення (без i18n для Preview)
+    const {
+      hasSocialMedia,
+      hasContactInfo,
+      hasWorkplaceInfo,
+      hasAdditionalInfo,
+      hasRentalHistory,
+      getSimpleDescription,
+      getSimpleLanguagesText,
+      getSimplePetsText,
+      getSimpleFlatmatesText,
+      getSimpleSmokingText,
+      getSimpleBudgetText,
+      getSimpleRentalDurationText,
+      getSimpleMoveInDateText,
+      getSimpleSalaryRangeText,
+      getSimpleIncomeDocumentText,
+      getSimpleWorkDurationText,
+      getSimpleRentalPeriodText,
+      getSimpleCityText,
+      getSimpleLandlordContactText,
+      getSimpleRentalConfirmationText,
+    } = useUserDisplay(userData); // Передаємо без t функції
+
+    return {
+      userData,
+      hasSocialMedia,
+      hasContactInfo,
+      hasWorkplaceInfo,
+      hasAdditionalInfo,
+      hasRentalHistory,
+      getSimpleDescription,
+      getSimpleLanguagesText,
+      getSimplePetsText,
+      getSimpleFlatmatesText,
+      getSimpleSmokingText,
+      getSimpleBudgetText,
+      getSimpleRentalDurationText,
+      getSimpleMoveInDateText,
+      getSimpleSalaryRangeText,
+      getSimpleIncomeDocumentText,
+      getSimpleWorkDurationText,
+      getSimpleRentalPeriodText,
+      getSimpleCityText,
+      getSimpleLandlordContactText,
+      getSimpleRentalConfirmationText,
+    };
+  },
 };
 </script>
+
 <style lang="scss">
 .preview {
   display: flex;
@@ -186,11 +251,11 @@ export default {
     border-radius: 3.6rem;
     border: .4rem solid $border-black;
     overflow-y: auto;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
     -ms-overflow-style: none;
     position: relative;
     &::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Opera */
+      display: none;
     }
   }
   &_gradient {
