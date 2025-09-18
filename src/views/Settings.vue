@@ -18,6 +18,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Navigation from '@/components/profile/Navigation.vue';
+import { signOutUser } from '@/services/authService';
 
 export default {
   name: 'SettingsApp',
@@ -42,14 +43,8 @@ export default {
       isLoading.value = true;
 
       try {
-        // Симулюємо затримку для UX
-        await new Promise((resolve) => { setTimeout(resolve, 800); });
-
-        // Очищаємо localStorage
-        localStorage.removeItem('currentUser');
-
-        // Перенаправляємо на сторінку входу
-        router.push('/access');
+        await signOutUser(); // Замість простого очищення localStorage
+        router.push('/login');
       } catch (error) {
         console.error('Помилка при виході:', error);
       } finally {

@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import View from '../views/View.vue';
 import Profile from '../views/Profile.vue';
-import AccessCode from '../views/AccessCode.vue';
+import Login from '../views/Login.vue';
 import Settings from '../views/Settings.vue';
 
 const routes = [
@@ -12,9 +12,9 @@ const routes = [
     component: HomeView,
   },
   {
-    path: '/access',
-    name: 'access',
-    component: AccessCode,
+    path: '/login',
+    name: 'login',
+    component: Login,
   },
   {
     path: '/profile',
@@ -26,7 +26,7 @@ const routes = [
       if (currentUser.profileId) {
         next();
       } else {
-        next('/access');
+        next('/login');
       }
     },
   },
@@ -40,7 +40,7 @@ const routes = [
       if (currentUser.profileId) {
         next();
       } else {
-        next('/access');
+        next('/login');
       }
     },
   },

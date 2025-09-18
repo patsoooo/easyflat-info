@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+// import { getAuth, connectAuthEmulator } from 'firebase/auth';
 
 // Ваша конфігурація з Firebase Console
 const firebaseConfig = {
@@ -16,5 +18,12 @@ const app = initializeApp(firebaseConfig);
 
 // Ініціалізація Firestore
 const db = getFirestore(app);
+const auth = getAuth(app);
 
+// Підключення до emulator тільки в режимі розробки
+// if (process.env.NODE_ENV === 'development' && !auth._config?.emulator?.url) {
+//   connectAuthEmulator(auth, 'http://localhost:9099');
+// }
+
+export { auth };
 export default db;

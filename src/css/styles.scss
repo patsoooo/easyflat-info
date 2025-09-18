@@ -450,7 +450,6 @@ a:hover {
   background-color: $btn-blue;
   @include text-13-medium;
   color: $text-white;
-  color: $text-blue;
   border-radius: 4rem;
   transition: all .3s ease;
   &.transparent {

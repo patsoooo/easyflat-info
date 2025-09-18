@@ -1235,3 +1235,94 @@ export const updateUserBasicInfo = async (profileId, firstName, lastName) => {
     throw error;
   }
 };
+
+// Отримати користувача за Google ID
+export const getUserByGoogleId = async (googleId) => {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('googleId', '==', googleId));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0];
+      return { id: userDoc.id, ...userDoc.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Помилка при отриманні користувача за Google ID:', error);
+    throw error;
+  }
+};
+
+// Створити користувача з Google авторизацією
+export const createUserWithGoogleAuth = async (googleData) => {
+  try {
+    const profileId = await generateUniqueProfileId();
+
+    const userData = {
+      googleId: googleData.googleId,
+      email: googleData.email,
+      firstName: googleData.firstName,
+      lastName: googleData.lastName,
+      photoURL: googleData.photoURL,
+      name: generateFullName(googleData.firstName, googleData.lastName),
+      initials: generateInitials(googleData.firstName, googleData.lastName),
+      citizenshipStatus: 'foreigner',
+      timeInPoland: 'less_than_1',
+      gender: 'male',
+      residenceDocument: 'residence_card',
+      description: generateDescription('foreigner', 'less_than_1'),
+
+      visible: true,
+      isActive: true,
+      profileCompleted: !!googleData.firstName, // true якщо є ім'я
+
+      // Контактна інформація з Google
+      contact: {
+        phone: null,
+        email: googleData.email,
+      },
+
+      // Порожні поля для майбутнього заповнення
+      socialMedia: {
+        whatsapp: null,
+        instagram: null,
+        facebook: null,
+        telegram: null,
+      },
+      workplace: {
+        company: null,
+        position: null,
+        workInfo: null,
+        salaryRange: null,
+        incomeDocument: null,
+        workDuration: null,
+      },
+      rentalHistory: [],
+      additionalInfo: {
+        languages: [],
+        languagesText: null,
+        hasPets: false,
+        petTypes: [],
+        petsText: null,
+        flatmates: null,
+        smoking: false,
+        budget: null,
+        rentalDuration: null,
+        moveInDate: null,
+        moveInDateText: null,
+      },
+
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const docRef = doc(db, 'users', profileId);
+    await setDoc(docRef, userData);
+
+    return { profileId, ...userData };
+  } catch (error) {
+    console.error('Помилка при створенні користувача з Google:', error);
+    throw error;
+  }
+};
