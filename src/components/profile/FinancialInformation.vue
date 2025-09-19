@@ -2,7 +2,7 @@
   <div class="section">
     <div class="section_heading">
       <div class="section_heading-top">
-        <h4>Фінансова інформація</h4>
+        <h4>{{ $t('financialInformation.title') }}</h4>
         <div class="section_heading-top-mes">
           <!-- Success message -->
           <p v-if="successMessage" class="success-message">
@@ -14,23 +14,23 @@
           </p>
         </div>
       </div>
-      <p>Додайте інформацію про ваше поточне місце роботи</p>
+      <p>{{ $t('financialInformation.description') }}</p>
     </div>
     <div class="section_content">
       <FormGroup>
         <FormInput
           v-model="localCompany"
-          placeholder="Назва компанії"
+          :placeholder="$t('financialInformation.workplace.company')"
           @update:modelValue="handleCompanyChange"
         />
         <FormInput
           v-model="localPosition"
-          placeholder="Ваша позиція"
+          :placeholder="$t('financialInformation.workplace.position')"
           @update:modelValue="handlePositionChange"
         />
       </FormGroup>
 
-      <FormRadioGroup title="Ваша зарплата">
+      <FormRadioGroup :title="$t('financialInformation.salary.title')">
         <FormRadio
           v-model="localSalaryRange"
           :options="salaryRangeOptions"
@@ -38,16 +38,16 @@
         />
       </FormRadioGroup>
 
-      <FormGroup title="Які підтвердження з роботи ви можете надати орендодавцю?">
+      <FormGroup :title="$t('financialInformation.incomeDocument.title')">
         <FormSelect
           v-model="localIncomeDocument"
           :options="incomeDocumentOptions"
-          placeholder="Тип документу"
+          :placeholder="$t('financialInformation.incomeDocument.placeholder')"
           @update:modelValue="handleIncomeDocumentChange"
         />
       </FormGroup>
 
-      <FormRadioGroup title="Термін роботи">
+      <FormRadioGroup :title="$t('financialInformation.workDuration.title')">
         <FormRadio
           v-model="localWorkDuration"
           :options="workDurationOptions"
@@ -59,7 +59,10 @@
 </template>
 
 <script>
-import { ref, inject, watch } from 'vue';
+import {
+  ref, inject, watch, computed,
+} from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   updateUser,
   getUserByProfileId,
@@ -84,6 +87,8 @@ export default {
     FormRadio,
   },
   setup() {
+    const { t } = useI18n();
+
     // Inject даних з батьківського компонента
     const userData = inject('userData', null);
     const updateUserData = inject('updateUserData', null);
@@ -98,21 +103,21 @@ export default {
     const successMessage = ref('');
     const errorMessage = ref('');
 
-    // Опції для селектів/радіо
-    const salaryRangeOptions = Object.keys(SALARY_RANGES).map((key) => ({
-      label: SALARY_RANGES[key].label,
+    // Опції для селектів/радіо з перекладами
+    const salaryRangeOptions = computed(() => Object.keys(SALARY_RANGES).map((key) => ({
+      label: t(`financialInformation.salary.${SALARY_RANGES[key].value}`),
       value: SALARY_RANGES[key].value,
-    }));
+    })));
 
-    const incomeDocumentOptions = Object.keys(INCOME_DOCUMENTS).map((key) => ({
-      label: INCOME_DOCUMENTS[key].label,
+    const incomeDocumentOptions = computed(() => Object.keys(INCOME_DOCUMENTS).map((key) => ({
+      label: t(`financialInformation.incomeDocument.${INCOME_DOCUMENTS[key].value}`),
       value: INCOME_DOCUMENTS[key].value,
-    }));
+    })));
 
-    const workDurationOptions = Object.keys(WORK_DURATION).map((key) => ({
-      label: WORK_DURATION[key].label,
+    const workDurationOptions = computed(() => Object.keys(WORK_DURATION).map((key) => ({
+      label: t(`financialInformation.workDuration.${WORK_DURATION[key].value}`),
       value: WORK_DURATION[key].value,
-    }));
+    })));
 
     // Синхронізація з userData при зміні
     watch(() => userData?.value, (newUserData) => {
@@ -125,17 +130,17 @@ export default {
       }
     }, { immediate: true });
 
-    // Показ повідомлень
+    // Показ повідомлень з перекладами
     const showSuccessMessage = () => {
-      successMessage.value = 'Збережено';
+      successMessage.value = t('financialInformation.messages.saved');
       errorMessage.value = '';
       setTimeout(() => {
         successMessage.value = '';
       }, 2000);
     };
 
-    const showErrorMessage = (message) => {
-      errorMessage.value = message;
+    const showErrorMessage = (messageKey) => {
+      errorMessage.value = t(messageKey);
       successMessage.value = '';
       setTimeout(() => {
         errorMessage.value = '';
@@ -171,7 +176,7 @@ export default {
     const updateWorkplace = async (field, value) => {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('financialInformation.messages.errorUserNotFound');
         return;
       }
 
@@ -196,9 +201,9 @@ export default {
 
         showSuccessMessage();
       } catch (error) {
-        // eslint-disable-next-line
         console.error(`Помилка оновлення ${field}:`, error);
-        showErrorMessage(`Помилка при збереженні ${field}`);
+        const errorKey = `errorSaving${field.charAt(0).toUpperCase() + field.slice(1)}`;
+        showErrorMessage(`financialInformation.messages.${errorKey}`);
       }
     };
 

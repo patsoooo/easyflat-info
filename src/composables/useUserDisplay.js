@@ -1,4 +1,5 @@
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   getTranslatedCitizenship,
   getTranslatedTimeInPoland,
@@ -39,9 +40,21 @@ import {
 /**
  * Композабл для відображення даних користувача
  * @param {Ref} userData - Реактивна змінна з даними користувача
- * @param {Function} t - Функція перекладу i18n (опціонально)
+ * @param {Function} tProp - Функція перекладу i18n (опціонально, для ViewUser.vue)
  */
-export default function useUserDisplay(userData, t = null) {
+export default function useUserDisplay(userData, tProp = null) {
+  // Отримуємо t функцію з useI18n якщо не передана ззовні
+  let t = tProp;
+  if (!t) {
+    try {
+      const i18n = useI18n();
+      t = i18n.t;
+    } catch (error) {
+      // Якщо useI18n недоступний, t залишається null
+      t = null;
+    }
+  }
+
   // Computed властивості для перевірки наявності даних
   const hasSocialMedia = computed(() => {
     if (!userData.value?.socialMedia) return false;
@@ -178,28 +191,54 @@ export default function useUserDisplay(userData, t = null) {
     return getTranslatedGender(userData.value.gender, t);
   };
 
-  // Функції для простого тексту (без i18n)
+  // ОНОВЛЕНІ функції для простого тексту (тепер ТЕОБЖ з i18n)
   const getSimpleDescription = () => {
     if (!userData.value) return '';
 
+    // Якщо є i18n, використовуємо переклади
+    if (t) {
+      const citizenshipText = getTranslatedCitizenship(userData.value.citizenshipStatus, t);
+      const timeText = getTranslatedTimeInPoland(userData.value.timeInPoland, t);
+      return `${citizenshipText}, ${timeText}`;
+    }
+
+    // Fallback до статичних констант
     const citizenshipText = CITIZENSHIP_STATUS[userData.value.citizenshipStatus]?.displayText || '';
     const timeText = TIME_IN_POLAND[userData.value.timeInPoland]?.displayText || '';
-
     return `${citizenshipText}, ${timeText}`;
   };
 
   const getSimpleGenderText = () => {
     if (!userData.value?.gender) return '';
+
+    if (t) {
+      return getTranslatedGender(userData.value.gender, t);
+    }
+
     return generateGenderText(userData.value.gender);
   };
 
   const getSimpleLanguagesText = () => {
     if (!userData.value?.additionalInfo?.languages) return '';
+
+    if (t) {
+      return generateTranslatedLanguagesText(userData.value.additionalInfo.languages, t);
+    }
+
     return generateLanguagesText(userData.value.additionalInfo.languages);
   };
 
   const getSimplePetsText = () => {
     if (!userData.value?.additionalInfo) return '';
+
+    if (t) {
+      return generateTranslatedPetsText(
+        userData.value.additionalInfo.hasPets,
+        userData.value.additionalInfo.petTypes,
+        t,
+      );
+    }
+
     return generatePetsText(
       userData.value.additionalInfo.hasPets,
       userData.value.additionalInfo.petTypes,
@@ -208,59 +247,130 @@ export default function useUserDisplay(userData, t = null) {
 
   const getSimpleFlatmatesText = () => {
     if (!userData.value?.additionalInfo?.flatmates) return '';
+
+    if (t) {
+      return getTranslatedFlatmates(userData.value.additionalInfo.flatmates, t);
+    }
+
     return FLATMATE_OPTIONS[userData.value.additionalInfo.flatmates]?.displayText || '';
   };
 
   const getSimpleSmokingText = () => {
     if (userData.value?.additionalInfo?.smoking === null
         || userData.value?.additionalInfo?.smoking === undefined) return '';
+
+    if (t) {
+      return getTranslatedSmoking(userData.value.additionalInfo.smoking, t);
+    }
+
     return userData.value.additionalInfo.smoking ? 'Курить' : 'Не курить';
   };
 
   const getSimpleBudgetText = () => {
     if (!userData.value?.additionalInfo?.budget) return '';
+
+    if (t) {
+      return getTranslatedBudget(userData.value.additionalInfo.budget, t);
+    }
+
     const budgetText = BUDGET_RANGES[userData.value.additionalInfo.budget]?.displayText || '';
     return `Бюджет: ${budgetText}`;
   };
 
   const getSimpleRentalDurationText = () => {
     if (!userData.value?.additionalInfo?.rentalDuration) return '';
+
+    if (t) {
+      return getTranslatedRentalDuration(userData.value.additionalInfo.rentalDuration, t);
+    }
+
     return RENTAL_DURATION[userData.value.additionalInfo.rentalDuration]?.displayText || '';
   };
 
   const getSimpleMoveInDateText = () => {
     if (!userData.value?.additionalInfo?.moveInDate) return '';
+
+    if (t) {
+      return generateTranslatedMoveInDate(userData.value.additionalInfo.moveInDate, t);
+    }
+
     return formatMoveInDate(userData.value.additionalInfo.moveInDate);
   };
 
   const getSimpleSalaryRangeText = () => {
     if (!userData.value?.workplace?.salaryRange) return '';
+
+    if (t) {
+      return getTranslatedSalaryRange(userData.value.workplace.salaryRange, t);
+    }
+
     return SALARY_RANGES[userData.value.workplace.salaryRange]?.displayText || '';
   };
 
   const getSimpleIncomeDocumentText = () => {
     if (!userData.value?.workplace?.incomeDocument) return '';
+
+    if (t) {
+      return getTranslatedIncomeDocument(userData.value.workplace.incomeDocument, t);
+    }
+
     return INCOME_DOCUMENTS[userData.value.workplace.incomeDocument]?.displayText || '';
   };
 
   const getSimpleWorkDurationText = () => {
     if (!userData.value?.workplace?.workDuration) return '';
+
+    if (t) {
+      return getTranslatedWorkDuration(userData.value.workplace.workDuration, t);
+    }
+
     return WORK_DURATION[userData.value.workplace.workDuration]?.displayText || '';
   };
 
-  const getSimpleRentalPeriodText = (period) => formatRentalPeriod(
-    period.startMonth,
-    period.startYear,
-    period.endMonth,
-    period.endYear,
-    period.isCurrentlyRenting,
-  );
+  const getSimpleRentalPeriodText = (period) => {
+    if (t) {
+      return generateTranslatedRentalPeriod(
+        period.startMonth,
+        period.startYear,
+        period.endMonth,
+        period.endYear,
+        period.isCurrentlyRenting,
+        t,
+      );
+    }
 
-  const getSimpleCityText = (city) => CITIES[city]?.displayText || '';
+    return formatRentalPeriod(
+      period.startMonth,
+      period.startYear,
+      period.endMonth,
+      period.endYear,
+      period.isCurrentlyRenting,
+    );
+  };
 
-  const getSimpleLandlordContactText = (contact) => formatLandlordContact(contact);
+  const getSimpleCityText = (city) => {
+    if (t) {
+      return getTranslatedCity(city, t);
+    }
 
-  const getSimpleRentalConfirmationText = (confirmation) => RENTAL_CONFIRMATIONS[confirmation]?.displayText || '';
+    return CITIES[city]?.displayText || '';
+  };
+
+  const getSimpleLandlordContactText = (contact) => {
+    if (t) {
+      return generateTranslatedLandlordContact(contact, t);
+    }
+
+    return formatLandlordContact(contact);
+  };
+
+  const getSimpleRentalConfirmationText = (confirmation) => {
+    if (t) {
+      return getTranslatedRentalConfirmation(confirmation, t);
+    }
+
+    return RENTAL_CONFIRMATIONS[confirmation]?.displayText || '';
+  };
 
   return {
     // Computed властивості
@@ -289,7 +399,7 @@ export default function useUserDisplay(userData, t = null) {
     getTranslatedRentalConfirmationText,
     getTranslatedRentalHistoryFallbackText,
 
-    // Функції без перекладів (для Preview.vue)
+    // Функції які тепер ТАКОЖ використовують i18n (для Preview.vue)
     getSimpleDescription,
     getSimpleGenderText,
     getSimpleLanguagesText,

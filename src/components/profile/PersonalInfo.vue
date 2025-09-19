@@ -2,7 +2,7 @@
   <div class="section">
     <div class="section_heading">
       <div class="section_heading-top">
-        <h4>Персональна інформація</h4>
+        <h4>{{ $t('personalInfo.title') }}</h4>
         <div class="section_heading-top-mes">
           <!-- Success message -->
           <p v-if="successMessage" class="success-message">
@@ -14,22 +14,22 @@
           </p>
         </div>
       </div>
-      <p>Так буде виглядати ваш профіль на сайті</p>
+      <p>{{ $t('personalInfo.description') }}</p>
     </div>
     <div class="section_content">
       <FormGroup>
         <FormInput
           v-model="localFirstName"
-          placeholder="Ім'я"
+          :placeholder="$t('personalInfo.firstName')"
           @update:modelValue="handleFirstNameChange"
         />
         <FormInput
           v-model="localLastName"
-          placeholder="Прізвище"
+          :placeholder="$t('personalInfo.lastName')"
           @update:modelValue="handleLastNameChange"
         />
       </FormGroup>
-      <FormGroup title="Ваша стать">
+      <FormGroup :title="$t('personalInfo.gender.title')">
         <FormRadio
           v-model="localGender"
           :options="genderOptions"
@@ -42,8 +42,9 @@
 
 <script>
 import {
-  ref, onMounted, inject, watch,
+  ref, onMounted, inject, watch, computed,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { updateUser, getUserByProfileId, GENDER } from '@/services/userService';
 import FormInput from '@/components/form/FormInput.vue';
 import FormRadio from '@/components/form/FormRadio.vue';
@@ -57,6 +58,8 @@ export default {
     FormGroup,
   },
   setup() {
+    const { t } = useI18n();
+
     // Inject function from parent Profile.vue
     const updateUserData = inject('updateUserData', null);
 
@@ -81,11 +84,11 @@ export default {
       updatePreviewData();
     });
 
-    // Options for gender
-    const genderOptions = Object.keys(GENDER).map((key) => ({
-      label: GENDER[key].label,
+    // Options for gender with translations
+    const genderOptions = computed(() => Object.keys(GENDER).map((key) => ({
+      label: t(`personalInfo.gender.${GENDER[key].value}`),
       value: GENDER[key].value,
-    }));
+    })));
 
     // Load current user data
     const loadUserData = async () => {
@@ -104,21 +107,21 @@ export default {
         }
       } catch (error) {
         console.error('Помилка завантаження даних:', error);
-        errorMessage.value = 'Помилка завантаження даних';
+        errorMessage.value = t('personalInfo.messages.errorLoading');
       }
     };
 
     // Success/error message functions
     const showSuccessMessage = () => {
-      successMessage.value = 'Збережено';
+      successMessage.value = t('personalInfo.messages.saved');
       errorMessage.value = '';
       setTimeout(() => {
         successMessage.value = '';
       }, 2000);
     };
 
-    const showErrorMessage = (message) => {
-      errorMessage.value = message;
+    const showErrorMessage = (messageKey) => {
+      errorMessage.value = t(messageKey);
       successMessage.value = '';
       setTimeout(() => {
         errorMessage.value = '';
@@ -132,7 +135,7 @@ export default {
 
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('personalInfo.messages.errorUserNotFound');
         return;
       }
 
@@ -141,7 +144,7 @@ export default {
         showSuccessMessage();
       } catch (error) {
         console.error('Помилка оновлення імені:', error);
-        showErrorMessage('Помилка при збереженні імені');
+        showErrorMessage('personalInfo.messages.errorSavingFirstName');
       }
     };
 
@@ -151,7 +154,7 @@ export default {
 
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('personalInfo.messages.errorUserNotFound');
         return;
       }
 
@@ -160,7 +163,7 @@ export default {
         showSuccessMessage();
       } catch (error) {
         console.error('Помилка оновлення прізвища:', error);
-        showErrorMessage('Помилка при збереженні прізвища');
+        showErrorMessage('personalInfo.messages.errorSavingLastName');
       }
     };
 
@@ -170,7 +173,7 @@ export default {
 
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('personalInfo.messages.errorUserNotFound');
         return;
       }
 
@@ -179,7 +182,7 @@ export default {
         showSuccessMessage();
       } catch (error) {
         console.error('Помилка оновлення статі:', error);
-        showErrorMessage('Помилка при збереженні статі');
+        showErrorMessage('personalInfo.messages.errorSavingGender');
         loadUserData(); // Restore previous value
       }
     };

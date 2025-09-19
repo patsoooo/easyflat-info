@@ -35,7 +35,7 @@
                   stroke-linejoin="round"
                 />
               </svg>
-              Ваш профіль
+              {{ $t('navigation.profile') }}
             </router-link>
           </li>
           <li>
@@ -86,7 +86,7 @@
               stroke-linecap="round"
               stroke-linejoin="round"/>
               </svg>
-              Налаштування
+              {{ $t('navigation.settings') }}
             </router-link>
           </li>
         </ul>
@@ -149,6 +149,11 @@ export default {
         }
       }
     }
+  }
+  &_lang {
+    display: flex;
+    justify-content: flex-end;
+    min-width: 10rem;
   }
 }
 </style>

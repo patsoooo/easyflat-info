@@ -2,7 +2,7 @@
   <div class="section">
     <div class="section_heading">
       <div class="section_heading-top">
-        <h4>Історія оренди</h4>
+        <h4>{{ $t('rentalFormHistory.title') }}</h4>
         <div class="section_heading-top-mes">
           <!-- Success message -->
           <p v-if="successMessage" class="success-message">
@@ -14,7 +14,7 @@
           </p>
         </div>
       </div>
-      <p>Додайте інформацію про попередні місця проживання</p>
+      <p>{{ $t('rentalFormHistory.description') }}</p>
     </div>
 
     <div class="section_content">
@@ -31,8 +31,8 @@
                 <img src="../../img/icons/build.svg" alt="build">
               </div>
               <div class="period_top-info">
-                <p>Оренда {{ index + 1 }}</p>
-                <span>Інформація про {{ index + 1 }} оренду</span>
+                <p>{{ $t('rentalFormHistory.rental') }} {{ index + 1 }}</p>
+                <span>{{ $t('rentalFormHistory.rentalInfo', { number: index + 1 }) }}</span>
               </div>
             </div>
             <div class="period_right">
@@ -56,55 +56,55 @@
           <!-- Форма показується тільки для періоду що редагується -->
           <div v-if="editingIndex === index" class="period_form">
 
-            <FormGroup title="Інформація про житло">
+            <FormGroup :title="$t('rentalFormHistory.housing.title')">
               <FormInput
                 v-model="period.street"
-                placeholder="Адреса"
+                :placeholder="$t('rentalFormHistory.housing.address')"
                 @update:modelValue="updatePeriodField(index, 'street', $event)"
               />
               <FormSelect
                 v-model="period.city"
                 :options="cityOptions"
-                placeholder="Місто"
+                :placeholder="$t('rentalFormHistory.housing.city')"
                 @update:modelValue="updatePeriodField(index, 'city', $event)"
               />
             </FormGroup>
 
             <FormFamily>
-              <FormGroup title="Період проживання">
+              <FormGroup :title="$t('rentalFormHistory.period.title')">
                 <FormDatePicker
                   v-model="period.startDate"
-                  placeholder="Дата початку оренди"
+                  :placeholder="$t('rentalFormHistory.period.startDate')"
                   @update:modelValue="updateStartDate(index, $event)"
                 />
 
                 <FormDatePicker
                   v-if="!period.isCurrentlyRenting"
                   v-model="period.endDate"
-                  placeholder="Дата закінчення оренди"
+                  :placeholder="$t('rentalFormHistory.period.endDate')"
                   @update:modelValue="updateEndDate(index, $event)"
                 />
               </FormGroup>
               <FormCheckbox
                 v-model="period.isCurrentlyRentingArray"
-                :options="[{ label: 'Орендую зараз', value: true }]"
+                :options="[{ label: $t('rentalFormHistory.period.currentlyRenting'), value: true }]"
                 @update:modelValue="updateCurrentlyRenting(index, $event)"
               />
             </FormFamily>
 
-            <FormGroup title="Які підтвердження про вчасні оплати ви можете надати?">
+            <FormGroup :title="$t('rentalFormHistory.confirmation.title')">
               <FormSelect
                 v-model="period.rentalConfirmation"
                 :options="rentalConfirmationOptions"
-                placeholder="Тип документу"
+                :placeholder="$t('rentalFormHistory.confirmation.placeholder')"
                 @update:modelValue="updatePeriodField(index, 'rentalConfirmation', $event)"
               />
             </FormGroup>
 
-            <FormGroup title="Контакт з власником">
+            <FormGroup :title="$t('rentalFormHistory.landlordContact.title')">
               <FormInput
                 v-model="period.landlordContact"
-                placeholder="Номер телефону або емейл"
+                :placeholder="$t('rentalFormHistory.landlordContact.placeholder')"
                 @update:modelValue="updatePeriodField(index, 'landlordContact', $event)"
               />
             </FormGroup>
@@ -119,7 +119,7 @@
         class="btn transparent"
         type="button"
       >
-        + Додати період оренди
+        {{ $t('rentalFormHistory.addPeriod') }}
       </button>
     </div>
   </div>
@@ -127,8 +127,9 @@
 
 <script>
 import {
-  ref, onMounted, inject, watch,
+  ref, onMounted, inject, watch, computed,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   updateUser,
   getUserByProfileId,
@@ -153,6 +154,8 @@ export default {
     FormDatePicker,
   },
   setup() {
+    const { t } = useI18n();
+
     // Inject functions from parent Profile.vue
     const updateUserData = inject('updateUserData', null);
 
@@ -161,16 +164,18 @@ export default {
     const successMessage = ref('');
     const errorMessage = ref('');
 
-    // Options for selects
-    const cityOptions = Object.keys(CITIES).map((key) => ({
-      label: CITIES[key].label,
+    // Options for selects with translations
+    const cityOptions = computed(() => Object.keys(CITIES).map((key) => ({
+      label: t(`rentalFormHistory.cities.${CITIES[key].value}`),
       value: CITIES[key].value,
-    }));
+    })));
 
-    const rentalConfirmationOptions = Object.keys(RENTAL_CONFIRMATIONS).map((key) => ({
-      label: RENTAL_CONFIRMATIONS[key].label,
-      value: RENTAL_CONFIRMATIONS[key].value,
-    }));
+    const rentalConfirmationOptions = computed(
+      () => Object.keys(RENTAL_CONFIRMATIONS).map((key) => ({
+        label: t(`rentalFormHistory.confirmation.${RENTAL_CONFIRMATIONS[key].value}`),
+        value: RENTAL_CONFIRMATIONS[key].value,
+      })),
+    );
 
     // Watch local rental history and update parent for preview
     watch(localRentalHistory, (newValue) => {
@@ -244,23 +249,22 @@ export default {
           }
         }
       } catch (error) {
-        // eslint-disable-next-line
         console.error('Помилка завантаження даних:', error);
-        errorMessage.value = 'Помилка завантаження даних';
+        errorMessage.value = t('rentalFormHistory.messages.errorLoading');
       }
     };
 
-    // Success/error message functions
+    // Success/error message functions with translations
     const showSuccessMessage = () => {
-      successMessage.value = 'Збережено';
+      successMessage.value = t('rentalFormHistory.messages.saved');
       errorMessage.value = '';
       setTimeout(() => {
         successMessage.value = '';
       }, 2000);
     };
 
-    const showErrorMessage = (message) => {
-      errorMessage.value = message;
+    const showErrorMessage = (messageKey) => {
+      errorMessage.value = t(messageKey);
       successMessage.value = '';
       setTimeout(() => {
         errorMessage.value = '';
@@ -271,7 +275,7 @@ export default {
     const updateRentalHistory = async () => {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('rentalFormHistory.messages.errorUserNotFound');
         return;
       }
 
@@ -301,9 +305,8 @@ export default {
         updatePreviewData();
         showSuccessMessage();
       } catch (error) {
-        // eslint-disable-next-line
         console.error('Помилка оновлення історії оренди:', error);
-        showErrorMessage('Помилка при збереженні історії оренди');
+        showErrorMessage('rentalFormHistory.messages.errorSaving');
         loadUserData(); // Restore previous value
       }
     };

@@ -32,10 +32,10 @@
           <div class="user_data-photo">{{ userData?.initials || 'NA' }}</div>
           <div class="user_data-name">
             {{ getSimpleGenderText() }}
-            {{ userData?.name || 'Введіть ім\'я...' }}
+            {{ userData?.name || $t('sections.defaultName') }}
           </div>
           <div class="user_data-desc">
-            {{ getSimpleDescription() || 'Оберіть статус і час перебування в Польщі' }}
+            {{ getSimpleDescription() || $t('sections.defaultDescription') }}
           </div>
 
           <!-- Соціальні мережі - показуємо тільки якщо є дані -->
@@ -65,7 +65,7 @@
 
         <!-- Контакт - показуємо тільки якщо є дані -->
         <div v-if="hasContactInfo" class="user_section">
-          <span class="user_section-title">Контакт</span>
+          <span class="user_section-title">{{ $t('sections.contact') }}</span>
           <ul class="user_list">
             <li v-if="userData?.contact?.phone" class="user_info">
               <img src="../../img/icons/phone.svg" alt="phone">
@@ -84,7 +84,7 @@
 
         <!-- Місце роботи - показуємо тільки якщо є дані -->
         <div v-if="hasWorkplaceInfo" class="user_section">
-          <span class="user_section-title">Місце роботи</span>
+          <span class="user_section-title">{{ $t('sections.workplace') }}</span>
           <ul class="user_list">
             <li v-if="userData?.workplace?.workInfo" class="user_info">
               <img src="../../img/icons/work.svg" alt="work">
@@ -112,7 +112,7 @@
 
         <!-- Історія оренди -->
         <div v-if="hasRentalHistory" class="user_section">
-          <span class="user_section-title">Історія оренди</span>
+          <span class="user_section-title">{{ $t('sections.rentalHistory') }}</span>
           <div class="user_history">
             <div
               v-for="(period, index) in userData.rentalHistory"
@@ -147,7 +147,7 @@
 
         <!-- Додаткова інформація -->
         <div v-if="hasAdditionalInfo" class="user_section">
-          <span class="user_section-title">Додаткова інформація</span>
+          <span class="user_section-title">{{ $t('sections.additionalInfo') }}</span>
           <ul class="user_list">
             <li v-if="userData?.additionalInfo?.languages?.length > 0" class="user_info">
               <img src="../../img/icons/language.svg" alt="language">

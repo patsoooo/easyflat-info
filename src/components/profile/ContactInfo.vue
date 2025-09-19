@@ -2,7 +2,7 @@
   <div class="section">
     <div class="section_heading">
       <div class="section_heading-top">
-        <h4>Контакт з вами</h4>
+        <h4>{{ $t('contactInfo.title') }}</h4>
         <div class="section_heading-top-mes">
           <!-- Success message -->
           <p v-if="successMessage" class="success-message">
@@ -14,42 +14,42 @@
           </p>
         </div>
       </div>
-      <p>Як з вами можна зв'язатися</p>
+      <p>{{ $t('contactInfo.description') }}</p>
     </div>
     <div class="section_content">
       <FormGroup>
         <FormInput
           v-model="localPhone"
-          placeholder="Ваш номер телефону"
+          :placeholder="$t('contactInfo.contact.phone')"
           @update:modelValue="handlePhoneChange"
         />
         <FormInput
           v-model="localEmail"
-          placeholder="Ваш емейл"
+          :placeholder="$t('contactInfo.contact.email')"
           type="email"
           @update:modelValue="handleEmailChange"
         />
       </FormGroup>
 
-      <FormGroup title="Соціальні мережі">
+      <FormGroup :title="$t('contactInfo.socialMedia.title')">
         <FormInput
           v-model="localFacebook"
-          placeholder="Посилання на Facebook"
+          :placeholder="$t('contactInfo.socialMedia.facebook')"
           @update:modelValue="handleFacebookChange"
         />
         <FormInput
           v-model="localInstagram"
-          placeholder="Посилання на Instagram"
+          :placeholder="$t('contactInfo.socialMedia.instagram')"
           @update:modelValue="handleInstagramChange"
         />
         <FormInput
           v-model="localTelegram"
-          placeholder="Посилання на Telegram"
+          :placeholder="$t('contactInfo.socialMedia.telegram')"
           @update:modelValue="handleTelegramChange"
         />
         <FormInput
           v-model="localWhatsapp"
-          placeholder="Номер Whatsapp"
+          :placeholder="$t('contactInfo.socialMedia.whatsapp')"
           @update:modelValue="handleWhatsappChange"
         />
       </FormGroup>
@@ -59,6 +59,7 @@
 
 <script>
 import { ref, inject, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { updateUser, getUserByProfileId } from '@/services/userService';
 import FormGroup from '@/components/form/FormGroup.vue';
 import FormInput from '@/components/form/FormInput.vue';
@@ -70,6 +71,8 @@ export default {
     FormGroup,
   },
   setup() {
+    const { t } = useI18n();
+
     // Inject даних з батьківського компонента
     const userData = inject('userData', null);
     const updateUserData = inject('updateUserData', null);
@@ -102,17 +105,17 @@ export default {
       }
     }, { immediate: true });
 
-    // Показ повідомлень
+    // Показ повідомлень з перекладами
     const showSuccessMessage = () => {
-      successMessage.value = 'Збережено';
+      successMessage.value = t('contactInfo.messages.saved');
       errorMessage.value = '';
       setTimeout(() => {
         successMessage.value = '';
       }, 2000);
     };
 
-    const showErrorMessage = (message) => {
-      errorMessage.value = message;
+    const showErrorMessage = (messageKey) => {
+      errorMessage.value = t(messageKey);
       successMessage.value = '';
       setTimeout(() => {
         errorMessage.value = '';
@@ -163,7 +166,7 @@ export default {
     const updateContact = async (field, value) => {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('contactInfo.messages.errorUserNotFound');
         return;
       }
 
@@ -176,9 +179,9 @@ export default {
         });
         showSuccessMessage();
       } catch (error) {
-        // eslint-disable-next-line
         console.error(`Помилка оновлення ${field}:`, error);
-        showErrorMessage(`Помилка при збереженні ${field}`);
+        const errorKey = field === 'phone' ? 'errorSavingPhone' : 'errorSavingEmail';
+        showErrorMessage(`contactInfo.messages.${errorKey}`);
       }
     };
 
@@ -186,7 +189,7 @@ export default {
     const updateSocialMedia = async (field, value) => {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('contactInfo.messages.errorUserNotFound');
         return;
       }
 
@@ -199,9 +202,9 @@ export default {
         });
         showSuccessMessage();
       } catch (error) {
-        // eslint-disable-next-line
         console.error(`Помилка оновлення ${field}:`, error);
-        showErrorMessage(`Помилка при збереженні ${field}`);
+        const errorKey = `errorSaving${field.charAt(0).toUpperCase() + field.slice(1)}`;
+        showErrorMessage(`contactInfo.messages.${errorKey}`);
       }
     };
 
@@ -215,7 +218,7 @@ export default {
       }
 
       if (value && !isValidPhone(value)) {
-        showErrorMessage('Невірний формат номера телефону');
+        showErrorMessage('contactInfo.messages.errorInvalidPhone');
         return;
       }
 
@@ -231,7 +234,7 @@ export default {
       }
 
       if (value && !isValidEmail(value)) {
-        showErrorMessage('Невірний формат email');
+        showErrorMessage('contactInfo.messages.errorInvalidEmail');
         return;
       }
 

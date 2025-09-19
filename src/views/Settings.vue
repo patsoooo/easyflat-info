@@ -3,8 +3,8 @@
   <div class="container-sm">
     <div class="settings">
       <div class="settings_heading">
-        <h4>Налаштування профілю</h4>
-        <p>Інформація про ваш профіль</p>
+        <h4>{{ $t('settings.title') }}</h4>
+        <p>{{ $t('settings.description') }}</p>
       </div>
       <ul class="settings_list">
         <li class="settings_item">
@@ -16,7 +16,7 @@
               >
             </div>
             <div class="settings_data">
-              <p>Спосіб входу</p>
+              <p>{{ $t('settings.authProvider.title') }}</p>
               <span>{{ getAuthProviderText() }}</span>
             </div>
           </div>
@@ -27,13 +27,13 @@
               <img src="../img/icons/link.svg" alt="link">
             </div>
             <div class="settings_data">
-              <p>Адреса профілю</p>
+              <p>{{ $t('settings.profileUrl.title') }}</p>
               <span>{{ getProfileUrl() }}</span>
             </div>
           </div>
           <div class="settings_right">
             <button class="copy" @click="copyProfileUrl">
-              {{ isCopied ? 'Скопійовано' : 'Копіювати' }}
+              {{ isCopied ? $t('settings.profileUrl.copied') : $t('settings.profileUrl.copy') }}
             </button>
           </div>
         </li>
@@ -43,9 +43,11 @@
               <img src="../img/icons/eye.svg" alt="eye">
             </div>
             <div class="settings_data">
-              <p>Видимість профілю</p>
-              <span>{{ isVisible ? 'Ваш профіль доступний для перегляду' :
-              'Ваш профіль прихований від інших' }}</span>
+              <p>{{ $t('settings.visibility.title') }}</p>
+              <span>
+                {{ isVisible ? $t('settings.visibility.visible')
+                : $t('settings.visibility.hidden') }}
+              </span>
             </div>
           </div>
           <div class="settings_right">
@@ -62,12 +64,14 @@
               <img src="../img/icons/delete.svg" alt="delete">
             </div>
             <div class="settings_data">
-              <p>Видалити профіль</p>
-              <span>Видаліть акаунт назавжди</span>
+              <p>{{ $t('settings.deleteProfile.title') }}</p>
+              <span>{{ $t('settings.deleteProfile.description') }}</span>
             </div>
           </div>
           <div class="settings_right">
-             <button class="delete" @click="showDeleteConfirm">Видалити</button>
+             <button class="delete" @click="showDeleteConfirm">
+              {{ $t('settings.deleteProfile.button') }}
+            </button>
           </div>
         </li>
         <li class="settings_logout">
@@ -75,8 +79,8 @@
             @click="handleLogout"
             :disabled="isLoading"
             >
-            <span v-if="isLoading">Виходжу...</span>
-            <span v-else>Вийти з профілю</span>
+            <span v-if="isLoading">{{ $t('settings.logout.loading') }}</span>
+            <span v-else>{{ $t('settings.logout.button') }}</span>
           </button>
         </li>
       </ul>
@@ -93,6 +97,7 @@
 <script>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/profile/Navigation.vue';
 import FormSwitch from '@/components/form/FormSwitch.vue';
 import { signOutUser } from '@/services/authService';
@@ -111,6 +116,7 @@ export default {
     PopupDelete,
   },
   setup() {
+    const { t } = useI18n();
     const router = useRouter();
     const currentUser = ref(null);
     const userData = ref(null);
@@ -178,18 +184,18 @@ export default {
       }
     };
 
-    // Текст про спосіб входу
+    // Текст про спосіб входу з перекладами
     const getAuthProviderText = () => {
       const provider = getAuthProviderName();
       const email = userData.value?.email || userData.value?.contact?.email || '';
 
       switch (provider) {
         case 'google':
-          return `Google Account: ${email}`;
+          return `${t('settings.authProvider.google')}: ${email}`;
         case 'facebook':
-          return `Facebook Account: ${email}`; // для майбутнього
+          return `${t('settings.authProvider.facebook')}: ${email}`; // для майбутнього
         default:
-          return 'Невідомий спосіб входу';
+          return t('settings.authProvider.unknown');
       }
     };
 

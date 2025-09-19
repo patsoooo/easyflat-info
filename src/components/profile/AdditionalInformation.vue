@@ -2,7 +2,7 @@
   <div class="section">
     <div class="section_heading">
       <div class="section_heading-top">
-        <h4>Додаткова інформація</h4>
+        <h4>{{ $t('additionalInfo.title') }}</h4>
         <div class="section_heading-top-mes">
           <!-- Success message -->
           <p v-if="successMessage" class="success-message">
@@ -14,10 +14,10 @@
           </p>
         </div>
       </div>
-      <p>Розкажіть більше про себе, щоб орендодавці краще вас знали</p>
+      <p>{{ $t('additionalInfo.description') }}</p>
     </div>
     <div class="section_content">
-      <FormCheckboxGroup title="Мови, якими ви володієте">
+      <FormCheckboxGroup :title="$t('additionalInfo.languages.title')">
         <FormCheckbox
           v-model="localLanguages"
           :options="languageOptions"
@@ -25,11 +25,11 @@
         />
       </FormCheckboxGroup>
 
-      <FormGroup title="Домашні тварини">
+      <FormGroup :title="$t('additionalInfo.pets.title')">
         <FormSelect
           v-model="localHasPets"
           :options="petOwnershipOptions"
-          placeholder="У вас є домашні тварини"
+          :placeholder="$t('additionalInfo.pets.hasPets')"
           @update:modelValue="handleHasPetsChange"
         />
         <FormSelect
@@ -37,30 +37,30 @@
           v-model="localPetTypes"
           :options="petTypeOptions"
           :multiple="true"
-          placeholder="Виберіть тварин, які у вас є"
+          :placeholder="$t('additionalInfo.pets.selectPets')"
           @update:modelValue="handlePetTypesChange"
         />
       </FormGroup>
 
-      <FormGroup title="Інформація про співмешканців">
+      <FormGroup :title="$t('additionalInfo.flatmates.title')">
         <FormSelect
           v-model="localFlatmates"
           :options="flatmateOptions"
-          placeholder="З ким ви будете орендувати житло"
+          :placeholder="$t('additionalInfo.flatmates.placeholder')"
           @update:modelValue="handleFlatmatesChange"
         />
       </FormGroup>
 
-      <FormGroup title="Шкідливі звички">
+      <FormGroup :title="$t('additionalInfo.smoking.title')">
         <FormSelect
           v-model="localSmoking"
           :options="smokingOptions"
-          placeholder="Ви палите?"
+          :placeholder="$t('additionalInfo.smoking.placeholder')"
           @update:modelValue="handleSmokingChange"
         />
       </FormGroup>
 
-      <FormRadioGroup title="Ваш бюджет на житло">
+      <FormRadioGroup :title="$t('additionalInfo.budget.title')">
         <FormRadio
           v-model="localBudget"
           :options="budgetOptions"
@@ -68,11 +68,11 @@
         />
       </FormRadioGroup>
 
-      <FormGroup title="Термін оренди">
+      <FormGroup :title="$t('additionalInfo.rentalDuration.title')">
         <FormSelect
           v-model="localRentalDuration"
           :options="rentalDurationOptions"
-          placeholder="Термін"
+          :placeholder="$t('additionalInfo.rentalDuration.placeholder')"
           @update:modelValue="handleRentalDurationChange"
         />
         <FormDatePicker
@@ -86,8 +86,9 @@
 
 <script>
 import {
-  ref, onMounted, inject, watch,
+  ref, onMounted, inject, watch, computed,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   updateUser,
   getUserByProfileId,
@@ -117,6 +118,8 @@ export default {
     FormDatePicker,
   },
   setup() {
+    const { t } = useI18n();
+
     // Inject function from parent Profile.vue
     const updateUserData = inject('updateUserData', null);
 
@@ -163,41 +166,41 @@ export default {
       updatePreviewData();
     }, { deep: true });
 
-    // Options for selects/checkboxes/radios
-    const languageOptions = Object.keys(LANGUAGES).map((key) => ({
-      label: LANGUAGES[key].label,
+    // Options for selects/checkboxes/radios with translations
+    const languageOptions = computed(() => Object.keys(LANGUAGES).map((key) => ({
+      label: t(`additionalInfo.languages.${LANGUAGES[key].value}`),
       value: LANGUAGES[key].value,
-    }));
+    })));
 
-    const petOwnershipOptions = [
-      { label: 'Так', value: true },
-      { label: 'Ні', value: false },
-    ];
+    const petOwnershipOptions = computed(() => [
+      { label: t('additionalInfo.pets.yes'), value: true },
+      { label: t('additionalInfo.pets.no'), value: false },
+    ]);
 
-    const petTypeOptions = Object.keys(PET_TYPES).map((key) => ({
-      label: PET_TYPES[key].label,
+    const petTypeOptions = computed(() => Object.keys(PET_TYPES).map((key) => ({
+      label: t(`additionalInfo.pets.${PET_TYPES[key].value}`),
       value: PET_TYPES[key].value,
-    }));
+    })));
 
-    const flatmateOptions = Object.keys(FLATMATE_OPTIONS).map((key) => ({
-      label: FLATMATE_OPTIONS[key].label,
+    const flatmateOptions = computed(() => Object.keys(FLATMATE_OPTIONS).map((key) => ({
+      label: t(`additionalInfo.flatmates.${FLATMATE_OPTIONS[key].value}`),
       value: FLATMATE_OPTIONS[key].value,
-    }));
+    })));
 
-    const smokingOptions = [
-      { label: 'Так', value: true },
-      { label: 'Ні', value: false },
-    ];
+    const smokingOptions = computed(() => [
+      { label: t('additionalInfo.smoking.yes'), value: true },
+      { label: t('additionalInfo.smoking.no'), value: false },
+    ]);
 
-    const budgetOptions = Object.keys(BUDGET_RANGES).map((key) => ({
-      label: BUDGET_RANGES[key].label,
+    const budgetOptions = computed(() => Object.keys(BUDGET_RANGES).map((key) => ({
+      label: t(`additionalInfo.budget.${BUDGET_RANGES[key].value}`),
       value: BUDGET_RANGES[key].value,
-    }));
+    })));
 
-    const rentalDurationOptions = Object.keys(RENTAL_DURATION).map((key) => ({
-      label: RENTAL_DURATION[key].label,
+    const rentalDurationOptions = computed(() => Object.keys(RENTAL_DURATION).map((key) => ({
+      label: t(`additionalInfo.rentalDuration.${RENTAL_DURATION[key].value}`),
       value: RENTAL_DURATION[key].value,
-    }));
+    })));
 
     // Load current user data
     const loadUserData = async () => {
@@ -221,23 +224,22 @@ export default {
           updatePreviewData();
         }
       } catch (error) {
-        // eslint-disable-next-line
         console.error('Помилка завантаження даних:', error);
-        errorMessage.value = 'Помилка завантаження даних';
+        errorMessage.value = t('additionalInfo.messages.errorLoading');
       }
     };
 
-    // Success/error message functions
+    // Success/error message functions with translations
     const showSuccessMessage = () => {
-      successMessage.value = 'Збережено';
+      successMessage.value = t('additionalInfo.messages.saved');
       errorMessage.value = '';
       setTimeout(() => {
         successMessage.value = '';
       }, 2000);
     };
 
-    const showErrorMessage = (message) => {
-      errorMessage.value = message;
+    const showErrorMessage = (messageKey) => {
+      errorMessage.value = t(messageKey);
       successMessage.value = '';
       setTimeout(() => {
         errorMessage.value = '';
@@ -283,7 +285,7 @@ export default {
     const updateAdditionalInfo = async (field, value) => {
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('additionalInfo.messages.errorUserNotFound');
         return;
       }
 
@@ -296,9 +298,8 @@ export default {
         });
         showSuccessMessage();
       } catch (error) {
-        // eslint-disable-next-line
         console.error(`Помилка оновлення ${field}:`, error);
-        showErrorMessage(`Помилка при збереженні ${field}`);
+        showErrorMessage('additionalInfo.messages.errorSaving');
         loadUserData(); // Restore previous value
       }
     };

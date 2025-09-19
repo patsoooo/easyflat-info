@@ -2,7 +2,7 @@
   <div class="section">
     <div class="section_heading">
       <div class="section_heading-top">
-        <h4>Інформація про побут</h4>
+        <h4>{{ $t('statusInPoland.title') }}</h4>
         <div class="section_heading-top-mes">
           <!-- Success message -->
           <p v-if="successMessage" class="success-message">
@@ -14,25 +14,25 @@
           </p>
         </div>
       </div>
-      <p>Ваш статус громадянства та час перебування в Польщі</p>
+      <p>{{ $t('statusInPoland.description') }}</p>
     </div>
     <div class="section_content">
       <FormGroup>
         <FormSelect
           v-model="localCitizenshipStatus"
           :options="citizenshipOptions"
-          placeholder="Оберіть статус громадянства"
+          :placeholder="$t('statusInPoland.citizenshipStatus.placeholder')"
           @update:modelValue="handleCitizenshipChange"
         />
         <FormSelect
           v-model="localResidenceDocument"
           :options="residenceDocumentOptions"
-          placeholder="Документ"
+          :placeholder="$t('statusInPoland.residenceDocument.placeholder')"
           @update:modelValue="handleResidenceDocumentChange"
         />
       </FormGroup>
 
-      <FormRadioGroup title="Термін перебування в Польщі">
+      <FormRadioGroup :title="$t('statusInPoland.timeInPoland.title')">
         <FormRadio
           v-model="localTimeInPoland"
           :options="timeInPolandOptions"
@@ -45,8 +45,9 @@
 
 <script>
 import {
-  ref, inject, watch,
+  ref, inject, watch, computed,
 } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   updateUser,
   CITIZENSHIP_STATUS,
@@ -68,6 +69,8 @@ export default {
     FormRadio,
   },
   setup() {
+    const { t } = useI18n();
+
     // Inject даних з батьківського компонента
     const userData = inject('userData', null);
     const updateUserData = inject('updateUserData', null);
@@ -78,21 +81,21 @@ export default {
     const successMessage = ref('');
     const errorMessage = ref('');
 
-    // Опції для селектів
-    const citizenshipOptions = Object.keys(CITIZENSHIP_STATUS).map((key) => ({
-      label: CITIZENSHIP_STATUS[key].label,
+    // Опції для селектів з перекладами
+    const citizenshipOptions = computed(() => Object.keys(CITIZENSHIP_STATUS).map((key) => ({
+      label: t(`statusInPoland.citizenshipStatus.${CITIZENSHIP_STATUS[key].value}`),
       value: CITIZENSHIP_STATUS[key].value,
-    }));
+    })));
 
-    const timeInPolandOptions = Object.keys(TIME_IN_POLAND).map((key) => ({
-      label: TIME_IN_POLAND[key].label,
+    const timeInPolandOptions = computed(() => Object.keys(TIME_IN_POLAND).map((key) => ({
+      label: t(`statusInPoland.timeInPoland.${TIME_IN_POLAND[key].value}`),
       value: TIME_IN_POLAND[key].value,
-    }));
+    })));
 
-    const residenceDocumentOptions = Object.keys(RESIDENCE_DOCUMENTS).map((key) => ({
-      label: RESIDENCE_DOCUMENTS[key].label,
+    const residenceDocumentOptions = computed(() => Object.keys(RESIDENCE_DOCUMENTS).map((key) => ({
+      label: t(`statusInPoland.residenceDocument.${RESIDENCE_DOCUMENTS[key].value}`),
       value: RESIDENCE_DOCUMENTS[key].value,
-    }));
+    })));
 
     // Синхронізація з userData при зміні
     watch(() => userData?.value, (newUserData) => {
@@ -103,17 +106,17 @@ export default {
       }
     }, { immediate: true });
 
-    // Показ повідомлень
+    // Показ повідомлень з перекладами
     const showSuccessMessage = () => {
-      successMessage.value = 'Збережено';
+      successMessage.value = t('statusInPoland.messages.saved');
       errorMessage.value = '';
       setTimeout(() => {
         successMessage.value = '';
       }, 2000);
     };
 
-    const showErrorMessage = (message) => {
-      errorMessage.value = message;
+    const showErrorMessage = (messageKey) => {
+      errorMessage.value = t(messageKey);
       successMessage.value = '';
       setTimeout(() => {
         errorMessage.value = '';
@@ -135,7 +138,7 @@ export default {
       // Зберігаємо в базу даних
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('statusInPoland.messages.errorUserNotFound');
         return;
       }
 
@@ -148,7 +151,7 @@ export default {
       } catch (error) {
         // eslint-disable-next-line
         console.error('Помилка оновлення статусу громадянства:', error);
-        showErrorMessage('Помилка при збереженні статусу громадянства');
+        showErrorMessage('statusInPoland.messages.errorSavingCitizenship');
       }
     };
 
@@ -167,7 +170,7 @@ export default {
       // Зберігаємо в базу даних
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('statusInPoland.messages.errorUserNotFound');
         return;
       }
 
@@ -180,7 +183,7 @@ export default {
       } catch (error) {
         // eslint-disable-next-line
         console.error('Помилка оновлення часу в Польщі:', error);
-        showErrorMessage('Помилка при збереженні часу в Польщі');
+        showErrorMessage('statusInPoland.messages.errorSavingTimeInPoland');
       }
     };
 
@@ -196,7 +199,7 @@ export default {
       // Зберігаємо в базу даних
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
-        showErrorMessage('Помилка: користувач не знайдений');
+        showErrorMessage('statusInPoland.messages.errorUserNotFound');
         return;
       }
 
@@ -206,7 +209,7 @@ export default {
       } catch (error) {
         // eslint-disable-next-line
         console.error('Помилка оновлення документа перебування:', error);
-        showErrorMessage('Помилка при збереженні документа перебування');
+        showErrorMessage('statusInPoland.messages.errorSavingResidenceDocument');
       }
     };
 
