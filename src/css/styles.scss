@@ -195,7 +195,7 @@ a:hover {
 
 .col-preview {
   flex: 0 0 auto;
-  width: 40rem;
+  width: 38.8rem;
   position: sticky;
   top: 12rem;
   height: fit-content;
@@ -344,7 +344,7 @@ a:hover {
         }
       }
       &-title {
-        @include text-11-medium;
+        @include text-13-medium;
         margin-left: 2.4rem;
         position: relative;
         margin-bottom: 1.2rem;
@@ -361,16 +361,16 @@ a:hover {
       }
     }
     &_data {
-      padding: 2.4rem 0 1.2rem;
+      padding: 4.4rem 0 1.2rem;
       margin-bottom: 1.2rem;
       &-photo {
         width: 10rem;
         height: 10rem;
         margin-bottom: 1.2rem;
-        @include text-20-bold;
+        @include text-24-bold;
       }
       &-name {
-        @include text-20-bold;
+        @include text-24-bold;
       }
       &-desc {
         @include text-13-regular;
@@ -378,10 +378,10 @@ a:hover {
       }
       &-social {
         li {
-          padding: 0 0.4rem;
+          padding: 0 0.6rem;
           a {
             img {
-              width: 2.8rem;
+              width: 3rem;
             }
           }
         }
@@ -394,7 +394,7 @@ a:hover {
       margin-bottom: .8rem;
       &-title {
         display: block;
-        @include text-11-medium;
+        @include text-13-medium;
         margin-bottom: .4rem;
         &.history {
           margin-top: 3.2rem;
@@ -402,19 +402,19 @@ a:hover {
       }
     }
     &_info {
-      padding: .8rem 0;
+      padding: 1rem 0;
       &-data {
         span {
-          @include text-10-regular;
+          @include text-13-regular;
           color: $text-grey-6;
         }
       }
       img {
-        width: 2rem;
-        margin-right: .8rem;
+        width: 2.4rem;
+        margin-right: 1.2rem;
       }
       p {
-        @include text-13-medium;
+        @include text-15-medium;
       }
     }
   }

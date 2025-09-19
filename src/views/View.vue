@@ -21,6 +21,7 @@
         <div class="user_data">
           <div class="user_data-photo">{{ userData?.initials || 'N/A' }}</div>
           <div class="user_data-name">
+            {{ getTranslatedGenderText() }}
             {{ userData?.name || 'Немає інформації' }}
           </div>
           <div class="user_data-desc">
@@ -227,6 +228,7 @@ export default {
       hasAdditionalInfo,
       hasRentalHistory,
       getTranslatedDescription,
+      getTranslatedGenderText,
       getTranslatedLanguagesText,
       getTranslatedPetsText,
       getTranslatedFlatmatesText,
@@ -288,6 +290,7 @@ export default {
       hasAdditionalInfo,
       hasRentalHistory,
       getTranslatedDescription,
+      getTranslatedGenderText,
       getTranslatedLanguagesText,
       getTranslatedPetsText,
       getTranslatedFlatmatesText,

@@ -1,12 +1,37 @@
 <template>
   <div class="preview">
+    <div class="preview_top">
+      <ul class="preview_actions">
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
+      <ul class="preview_tabs">
+        <li class="preview_tab">
+          <div class="preview_tab-icon"></div>
+          <div class="preview_tab-address"></div>
+        </li>
+        <li class="preview_tab">
+          <div class="preview_tab-icon"></div>
+          <div class="preview_tab-address"></div>
+        </li>
+      </ul>
+    </div>
+    <div class="preview_search">
+      <div class="preview_search-input">
+        <div class="preview_search-input-icon"></div>
+        <div class="preview_search-input-address"></div>
+      </div>
+    </div>
     <div class="preview_tablet">
       <div class="preview_gradient"></div>
+      <img src="../../img/logo-small.svg" alt="logo" class="preview_logo">
       <div class="user">
         <div class="user_data">
           <!-- Реальні дані з inject -->
           <div class="user_data-photo">{{ userData?.initials || 'NA' }}</div>
           <div class="user_data-name">
+            {{ getSimpleGenderText() }}
             {{ userData?.name || 'Введіть ім\'я...' }}
           </div>
           <div class="user_data-desc">
@@ -193,6 +218,7 @@ export default {
       hasAdditionalInfo,
       hasRentalHistory,
       getSimpleDescription,
+      getSimpleGenderText,
       getSimpleLanguagesText,
       getSimplePetsText,
       getSimpleFlatmatesText,
@@ -217,6 +243,7 @@ export default {
       hasAdditionalInfo,
       hasRentalHistory,
       getSimpleDescription,
+      getSimpleGenderText,
       getSimpleLanguagesText,
       getSimplePetsText,
       getSimpleFlatmatesText,
@@ -236,23 +263,97 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .preview {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   width: 100%;
-  height: auto;
-  box-shadow: 0 0 60px 0 rgba(0, 0, 0, 0.10);
-  border-radius: 2rem;
-  padding: 3.2rem 2rem;
+  height: calc(100vh - 20rem);
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 3px 10px;
+  border-radius: 1.6rem;
+  &_top {
+    width: 100%;
+    height: 4.4rem !important;
+    display: flex;
+    align-items: center;
+    background-color: $skeleton-bg;
+    border-radius: 1.6rem 1.6rem 0 0;
+    padding: .8rem 0 0 1.6rem;
+  }
+  &_actions {
+    display: flex;
+    align-items: center;
+    margin-right: 1.2rem;
+    li {
+      background-color: $skeleton-text;
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 100%;
+      margin-right: .6rem;
+    }
+  }
+  &_tabs {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  &_tab {
+    height: 3.6rem;
+    min-width: 18rem;
+    display: flex;
+    align-items: center;
+    border-radius: 1.2rem 1.2rem 0 0;
+    background-color: $bg-white;
+    padding-left: 1.2rem;
+    &-icon {
+      background: $skeleton-text;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: .4rem;
+      margin-right: .8rem;
+    }
+    &-address {
+      background: $skeleton-text;
+      width: 8rem;
+      height: 1.2rem;
+      border-radius: .4rem;
+    }
+    &:last-child {
+      opacity: .4;
+    }
+  }
+  &_search {
+    width: 100%;
+    padding: .8rem 1.2rem;
+    border-bottom: .1rem solid $border-form;
+    &-input {
+      display: flex;
+      align-items: center;
+      background-color: $skeleton-search;
+      border-radius: .8rem;
+      padding: .8rem 1.2rem;
+      &-icon {
+        background: $skeleton-text;
+        width: 1.6rem;
+        height: 1.6rem;
+        border-radius: .4rem;
+        margin-right: .8rem;
+      }
+      &-address {
+        background: $skeleton-text;
+        width: 8rem;
+        height: 1.2rem;
+        border-radius: .4rem;
+      }
+    }
+  }
   &_tablet {
-    width: 32rem;
-    height: 64rem;
-    border-radius: 3.6rem;
-    border: .4rem solid $border-black;
+    width: 100%;
+    height: 100%;
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    border-radius: 0 0 1.6rem 1.6rem;
     position: relative;
     &::-webkit-scrollbar {
       display: none;
@@ -265,7 +366,14 @@ export default {
     z-index: -1;
     width: 100%;
     height: 20rem;
-    background: linear-gradient(180deg, #C8DEFD 0%, #fff 100%);
+    background: linear-gradient(180deg, #D6E0FF 0%, #fff 100%);
+  }
+  &_logo {
+    position: absolute;
+    top: 1.6rem;
+    left: 1.6rem;
+    height: 2.4rem;
+    z-index: 1;
   }
 }
 </style>

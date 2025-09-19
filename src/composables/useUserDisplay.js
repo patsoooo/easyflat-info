@@ -17,6 +17,7 @@ import {
   getTranslatedCity,
   getTranslatedRentalConfirmation,
   getTranslatedRentalHistoryFallback,
+  getTranslatedGender,
   CITIZENSHIP_STATUS,
   TIME_IN_POLAND,
   SALARY_RANGES,
@@ -32,6 +33,7 @@ import {
   generateLanguagesText,
   generatePetsText,
   formatMoveInDate,
+  generateGenderText,
 } from '@/services/userService';
 
 /**
@@ -171,6 +173,11 @@ export default function useUserDisplay(userData, t = null) {
     return getTranslatedRentalHistoryFallback(t);
   };
 
+  const getTranslatedGenderText = () => {
+    if (!userData.value?.gender || !t) return '';
+    return getTranslatedGender(userData.value.gender, t);
+  };
+
   // Функції для простого тексту (без i18n)
   const getSimpleDescription = () => {
     if (!userData.value) return '';
@@ -179,6 +186,11 @@ export default function useUserDisplay(userData, t = null) {
     const timeText = TIME_IN_POLAND[userData.value.timeInPoland]?.displayText || '';
 
     return `${citizenshipText}, ${timeText}`;
+  };
+
+  const getSimpleGenderText = () => {
+    if (!userData.value?.gender) return '';
+    return generateGenderText(userData.value.gender);
   };
 
   const getSimpleLanguagesText = () => {
@@ -260,6 +272,7 @@ export default function useUserDisplay(userData, t = null) {
 
     // Функції з перекладами (для View.vue)
     getTranslatedDescription,
+    getTranslatedGenderText,
     getTranslatedLanguagesText,
     getTranslatedPetsText,
     getTranslatedFlatmatesText,
@@ -278,6 +291,7 @@ export default function useUserDisplay(userData, t = null) {
 
     // Функції без перекладів (для Preview.vue)
     getSimpleDescription,
+    getSimpleGenderText,
     getSimpleLanguagesText,
     getSimplePetsText,
     getSimpleFlatmatesText,

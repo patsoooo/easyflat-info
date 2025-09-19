@@ -41,7 +41,9 @@
 </template>
 
 <script>
-import { ref, watch, onMounted } from 'vue';
+import {
+  ref, onMounted, inject, watch,
+} from 'vue';
 import { updateUser, getUserByProfileId, GENDER } from '@/services/userService';
 import FormInput from '@/components/form/FormInput.vue';
 import FormRadio from '@/components/form/FormRadio.vue';
@@ -54,31 +56,38 @@ export default {
     FormRadio,
     FormGroup,
   },
-  props: {
-    firstName: {
-      type: String,
-      default: '',
-    },
-    lastName: {
-      type: String,
-      default: '',
-    },
-  },
-  emits: ['update:firstName', 'update:lastName'],
-  setup(props, { emit }) {
-    const localFirstName = ref(props.firstName);
-    const localLastName = ref(props.lastName);
-    const localGender = ref('male'); // дефолтне значення
+  setup() {
+    // Inject function from parent Profile.vue
+    const updateUserData = inject('updateUserData', null);
+
+    // Local states
+    const localFirstName = ref('');
+    const localLastName = ref('');
+    const localGender = ref('male');
     const successMessage = ref('');
     const errorMessage = ref('');
 
-    // Опції для статі
+    // Helper function to update preview immediately
+    const updatePreviewData = () => {
+      if (updateUserData) {
+        updateUserData('firstName', localFirstName.value);
+        updateUserData('lastName', localLastName.value);
+        updateUserData('gender', localGender.value);
+      }
+    };
+
+    // Watch all local states and update preview
+    watch([localFirstName, localLastName, localGender], () => {
+      updatePreviewData();
+    });
+
+    // Options for gender
     const genderOptions = Object.keys(GENDER).map((key) => ({
       label: GENDER[key].label,
       value: GENDER[key].value,
     }));
 
-    // Завантаження поточних даних користувача
+    // Load current user data
     const loadUserData = async () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -86,25 +95,20 @@ export default {
 
         const user = await getUserByProfileId(currentUser.profileId);
         if (user) {
+          localFirstName.value = user.firstName || '';
+          localLastName.value = user.lastName || '';
           localGender.value = user.gender || 'male';
+
+          // Update preview data after loading
+          updatePreviewData();
         }
       } catch (error) {
-        // eslint-disable-next-line
         console.error('Помилка завантаження даних:', error);
         errorMessage.value = 'Помилка завантаження даних';
       }
     };
 
-    // Оновлюємо локальні значення коли змінюються пропси
-    watch(() => props.firstName, (newValue) => {
-      localFirstName.value = newValue;
-    });
-
-    watch(() => props.lastName, (newValue) => {
-      localLastName.value = newValue;
-    });
-
-    // Показ повідомлення про успіх
+    // Success/error message functions
     const showSuccessMessage = () => {
       successMessage.value = 'Збережено';
       errorMessage.value = '';
@@ -113,7 +117,6 @@ export default {
       }, 2000);
     };
 
-    // Показ повідомлення про помилку
     const showErrorMessage = (message) => {
       errorMessage.value = message;
       successMessage.value = '';
@@ -122,10 +125,10 @@ export default {
       }, 3000);
     };
 
-    // Автоматичне збереження імені
+    // Field change handlers
     const handleFirstNameChange = async (value) => {
       localFirstName.value = value;
-      emit('update:firstName', value);
+      // Preview updates automatically via watcher
 
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
@@ -137,16 +140,14 @@ export default {
         await updateUser(currentUser.profileId, { firstName: value });
         showSuccessMessage();
       } catch (error) {
-        // eslint-disable-next-line
         console.error('Помилка оновлення імені:', error);
         showErrorMessage('Помилка при збереженні імені');
       }
     };
 
-    // Автоматичне збереження прізвища
     const handleLastNameChange = async (value) => {
       localLastName.value = value;
-      emit('update:lastName', value);
+      // Preview updates automatically via watcher
 
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
@@ -158,15 +159,14 @@ export default {
         await updateUser(currentUser.profileId, { lastName: value });
         showSuccessMessage();
       } catch (error) {
-        // eslint-disable-next-line
         console.error('Помилка оновлення прізвища:', error);
         showErrorMessage('Помилка при збереженні прізвища');
       }
     };
 
-    // Обробка зміни статі
     const handleGenderChange = async (value) => {
       localGender.value = value;
+      // Preview updates automatically via watcher
 
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (!currentUser.profileId) {
@@ -178,15 +178,13 @@ export default {
         await updateUser(currentUser.profileId, { gender: value });
         showSuccessMessage();
       } catch (error) {
-        // eslint-disable-next-line
         console.error('Помилка оновлення статі:', error);
         showErrorMessage('Помилка при збереженні статі');
-        // Відновлення попереднього значення при помилці
-        loadUserData();
+        loadUserData(); // Restore previous value
       }
     };
 
-    // Завантажуємо дані при монтуванні
+    // Load data on mount
     onMounted(() => {
       loadUserData();
     });

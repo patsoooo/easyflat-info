@@ -1,5 +1,9 @@
 const translations = {
   uk: {
+    gender: {
+      male: 'Пан',
+      female: 'Пані',
+    },
     sections: {
       contact: 'Контакт',
       workplace: 'Місце роботи',
@@ -199,6 +203,10 @@ const translations = {
   },
 
   pl: {
+    gender: {
+      male: 'Pan',
+      female: 'Pani',
+    },
     sections: {
       contact: 'Kontakt',
       workplace: 'Miejsce pracy',
@@ -397,6 +405,10 @@ const translations = {
   },
 
   en: {
+    gender: {
+      male: 'Mr',
+      female: 'Ms',
+    },
     sections: {
       contact: 'Contact',
       workplace: 'Workplace',

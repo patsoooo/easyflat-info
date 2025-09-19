@@ -720,6 +720,16 @@ export const formatMoveInDate = (dateString) => {
   }
 };
 
+export const generateGenderText = (gender) => {
+  if (!gender) return '';
+  return GENDER[gender]?.displayText || '';
+};
+
+export const getTranslatedGender = (gender, t) => {
+  if (!gender || !t) return '';
+  return t(`gender.${gender}`);
+};
+
 // Функція для форматування періоду оренди
 export const
   formatRentalPeriod = (startMonth, startYear, endMonth, endYear, isCurrentlyRenting) => {

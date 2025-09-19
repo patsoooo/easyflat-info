@@ -4,12 +4,7 @@
     <div class="wrapper">
       <div class="col-form">
         <div class="sections">
-          <PersonalInfo
-            :firstName="userData.firstName"
-            :lastName="userData.lastName"
-            @update:firstName="updateUserData('firstName', $event)"
-            @update:lastName="updateUserData('lastName', $event)"
-          />
+          <PersonalInfo/>
           <StatusInPoland />
           <ContactInfo />
           <FinancialInformation />
