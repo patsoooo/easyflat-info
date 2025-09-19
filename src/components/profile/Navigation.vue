@@ -91,15 +91,20 @@
           </li>
         </ul>
         <div class="nav_lang">
-          Укр
+          <ChangeLanguage />
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
+import ChangeLanguage from '@/components/ChangeLanguage.vue';
+
 export default {
   name: 'NavigationProfile',
+  components: {
+    ChangeLanguage,
+  },
 };
 </script>
 <style lang="scss" scoped>

@@ -4,50 +4,17 @@
       <img src="../img/logo-small.svg" alt="logo">
     </div>
     <div class="header_language">
-      <label for="language-select" class="visually-hidden">
-        <select
-        id="language-select"
-        v-model="currentLocale"
-        @change="handleLanguageChange"
-        class="header_language-select"
-        aria-labelledby="language-select-label"
-      >
-        <option value="uk">{{ $t('languages.ukrainian') }}</option>
-        <option value="pl">{{ $t('languages.polish') }}</option>
-        <option value="en">{{ $t('languages.english') }}</option>
-      </select>
-      </label>
+      <ChangeLanguage />
     </div>
   </div>
 </template>
 <script>
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { changeLocale } from '../i18n';
+import ChangeLanguage from '@/components/ChangeLanguage.vue';
 
 export default {
   name: 'HeaderApp',
-  setup() {
-    const { locale } = useI18n();
-
-    // Поточна мова
-    const currentLocale = computed({
-      get: () => locale.value,
-      set: (newLocale) => {
-        changeLocale(newLocale);
-      },
-    });
-
-    // Обробник зміни мови
-    const handleLanguageChange = (event) => {
-      const newLocale = event.target.value;
-      changeLocale(newLocale);
-    };
-
-    return {
-      currentLocale,
-      handleLanguageChange,
-    };
+  components: {
+    ChangeLanguage,
   },
 };
 </script>
