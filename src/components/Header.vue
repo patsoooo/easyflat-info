@@ -1,7 +1,7 @@
 <template>
   <div class="header">
     <div class="header_logo">
-      <img src="../img/logo-black.svg" alt="logo">
+      <img src="../img/logo-small.svg" alt="logo">
     </div>
     <div class="header_language">
       <label for="language-select" class="visually-hidden">
