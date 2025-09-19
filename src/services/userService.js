@@ -800,13 +800,36 @@ export const formatLandlordContact = (contact) => {
 };
 
 // Отримати користувача за profileId
+// export const getUserByProfileId = async (profileId) => {
+//   try {
+//     const docRef = doc(db, 'users', profileId);
+//     const docSnap = await getDoc(docRef);
+
+//     if (docSnap.exists()) {
+//       return { id: docSnap.id, ...docSnap.data() };
+//     }
+//     return null;
+//   } catch (error) {
+//     // eslint-disable-next-line
+//     console.error('Помилка при отриманні користувача:', error);
+//     throw error;
+//   }
+// };
+
 export const getUserByProfileId = async (profileId) => {
   try {
     const docRef = doc(db, 'users', profileId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
+      const userData = { id: docSnap.id, ...docSnap.data() };
+
+      // Перевіряємо чи не видалений користувач
+      if (userData.isDeleted === true) {
+        return null; // Повертаємо null для видалених користувачів
+      }
+
+      return userData;
     }
     return null;
   } catch (error) {
@@ -837,7 +860,8 @@ export const createUser = async (userData) => {
       gender: userData.gender || 'male',
       residenceDocument: userData.residenceDocument || 'residence_card',
       description: generateDescription(citizenshipStatus, timeInPoland),
-      visible: true, // профіль видимий за замовчуванням
+      isDeleted: false,
+      visible: false, // профіль невидимий за замовчуванням
       profileCompleted: true,
 
       // Соціальні мережі
@@ -1174,7 +1198,8 @@ export const createUserWithAccessCode = async () => {
 
       // Код доступу та статуси
       accessCode,
-      visible: true,
+      visible: false,
+      isDeleted: false,
       isActive: true,
       profileCompleted: false, // чи заповнений профіль
 
@@ -1256,6 +1281,23 @@ export const updateUserBasicInfo = async (profileId, firstName, lastName) => {
 };
 
 // Отримати користувача за Google ID
+// export const getUserByGoogleId = async (googleId) => {
+//   try {
+//     const usersRef = collection(db, 'users');
+//     const q = query(usersRef, where('googleId', '==', googleId));
+//     const querySnapshot = await getDocs(q);
+
+//     if (!querySnapshot.empty) {
+//       const userDoc = querySnapshot.docs[0];
+//       return { id: userDoc.id, ...userDoc.data() };
+//     }
+//     return null;
+//   } catch (error) {
+//     // eslint-disable-next-line
+//     console.error('Помилка при отриманні користувача за Google ID:', error);
+//     throw error;
+//   }
+// };
 export const getUserByGoogleId = async (googleId) => {
   try {
     const usersRef = collection(db, 'users');
@@ -1264,12 +1306,36 @@ export const getUserByGoogleId = async (googleId) => {
 
     if (!querySnapshot.empty) {
       const userDoc = querySnapshot.docs[0];
-      return { id: userDoc.id, ...userDoc.data() };
+      const userData = { id: userDoc.id, ...userDoc.data() };
+
+      // Якщо користувач видалений, повертаємо null
+      // щоб створити новий профіль
+      if (userData.isDeleted === true) {
+        return null;
+      }
+
+      return userData;
     }
     return null;
   } catch (error) {
     // eslint-disable-next-line
     console.error('Помилка при отриманні користувача за Google ID:', error);
+    throw error;
+  }
+};
+
+// Функція для оновлення видимості профілю
+export const updateProfileVisibility = async (profileId, isVisible) => {
+  try {
+    const docRef = doc(db, 'users', profileId);
+    await updateDoc(docRef, {
+      visible: isVisible,
+      updatedAt: new Date().toISOString(),
+    });
+    return true;
+  } catch (error) {
+    // eslint-disable-next-line
+    console.error('Помилка при оновленні видимості профілю:', error);
     throw error;
   }
 };
@@ -1293,7 +1359,8 @@ export const createUserWithGoogleAuth = async (googleData) => {
       residenceDocument: 'residence_card',
       description: generateDescription('foreigner', 'less_than_1'),
 
-      visible: true,
+      visible: false,
+      isDeleted: false,
       isActive: true,
       profileCompleted: !!googleData.firstName, // true якщо є ім'я
 
@@ -1344,6 +1411,33 @@ export const createUserWithGoogleAuth = async (googleData) => {
   } catch (error) {
     // eslint-disable-next-line
     console.error('Помилка при створенні користувача з Google:', error);
+    throw error;
+  }
+};
+
+// М'яке видалення користувача
+export const softDeleteUser = async (profileId) => {
+  try {
+    const docRef = doc(db, 'users', profileId);
+    await updateDoc(docRef, {
+      isDeleted: true,
+      visible: false, // також робимо профіль невидимим
+      updatedAt: new Date().toISOString(),
+      // contact: {
+      //   phone: null,
+      //   email: null,
+      // },
+      // socialMedia: {
+      //   whatsapp: null,
+      //   instagram: null,
+      //   facebook: null,
+      //   telegram: null,
+      // },
+    });
+    return true;
+  } catch (error) {
+    // eslint-disable-next-line
+    console.error('Помилка при м\'якому видаленні користувача:', error);
     throw error;
   }
 };

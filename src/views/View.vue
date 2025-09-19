@@ -16,6 +16,12 @@
         {{ error }}
       </div>
 
+      <!-- Профіль прихований -->
+      <div v-else-if="userData && !userData.visible">
+          <h3>Профіль приховано</h3>
+          <p>Користувач зробив свій профіль недоступним для перегляду</p>
+      </div>
+
       <!-- Дані користувача -->
       <div v-else class="user">
         <div class="user_data">

@@ -23,6 +23,8 @@ const routes = [
     beforeEnter: (to, from, next) => {
       // Перевіряємо чи є користувач в localStorage
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      // eslint-disable-next-line
+      console.log('Router guard - currentUser:', currentUser);
       if (currentUser.profileId) {
         next();
       } else {
@@ -37,6 +39,8 @@ const routes = [
     beforeEnter: (to, from, next) => {
       // Перевіряємо чи є користувач в localStorage
       const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      // eslint-disable-next-line
+      console.log('Router guard - currentUser:', currentUser);
       if (currentUser.profileId) {
         next();
       } else {

@@ -88,7 +88,8 @@ export default {
     const handleUserLogin = (user) => {
       // Зберігаємо дані користувача
       localStorage.setItem('currentUser', JSON.stringify({
-        profileId: user.id, // Використовуємо 'id' замість 'profileId' з об'єкта dbUser
+        profileId: user.profileId || user.id, // Використовуємо 'id' замість 'profileId'
+        // з об'єкта dbUser
         googleId: user.googleId,
         email: user.email,
         firstName: user.firstName,
@@ -111,6 +112,14 @@ export default {
         if (user === null) {
           return;
         }
+
+        // Дебаг
+        // eslint-disable-next-line
+        console.log('Отримані дані користувача:', user);
+        // eslint-disable-next-line
+        console.log('ProfileId:', user.profileId);
+        // eslint-disable-next-line
+        console.log('ID:', user.id);
 
         handleUserLogin(user);
       } catch (error) {
